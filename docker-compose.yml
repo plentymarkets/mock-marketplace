@@ -1,39 +1,88 @@
 version: '3'
 services:
-  # Database service
-  database:
-    image: postgres:latest
-    container_name: my_database
+  # Database service for auth
+#  auth-database:
+#    image: mysql:latest
+#    container_name: auth_database
+#    environment:
+#      POSTGRES_DB: authdb
+#      POSTGRES_USER: myuser
+#      POSTGRES_PASSWORD: mypassword
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - ./database/auth/init.sql:/docker-entrypoint-initdb.d/init.sql
+#    networks:
+#      - my_network
+
+  # Database service for offer-management
+#  offer-management-database:
+#    image: mysql:latest
+#    container_name: offer_management_database
+#    environment:
+#      POSTGRES_DB: offerdb
+#      POSTGRES_USER: myuser
+#      POSTGRES_PASSWORD: mypassword
+#    ports:
+#      - "5433:5433"
+#    volumes:
+#      - ./database/offer-management/init.sql:/docker-entrypoint-initdb.d/init.sql
+#    networks:
+#      - my_network
+
+  # Database service for order-management
+  order-management-database:
+    image: mariadb:latest
+    container_name: order_management_database
     environment:
-      POSTGRES_DB: mydb
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+      DATABASE_DRIVER: mariadb
+      MYSQL_DATABASE: orderdb
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+      MYSQL_ROOT_PASSWORD: myrootpassword
+      MYSQL_TCP_PORT: 5434
+      MYSQL_DSN: "myuser:mypassword@tcp(localhost:5434)/orderdb"
     ports:
-      - "5432:5432"
+      - "5434:5434"
     volumes:
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/order-management/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - my_network
+
+  # Database service for product-management
+#  product-management-database:
+#    image: mysql:latest
+#    container_name: product_management_database
+#    environment:
+#      POSTGRES_DB: productdb
+#      POSTGRES_USER: myuser
+#      POSTGRES_PASSWORD: mypassword
+#    ports:
+#      - "5435:5435"
+#    volumes:
+#      - ./database/product-management/init.sql:/docker-entrypoint-initdb.d/init.sql
+#    networks:
+#      - my_network
 
   # Microservice 1
-  auth:
-    build:
-      context: ./auth
-    container_name: auth
-    ports:
-      - "3001:3001"
-    networks:
-      - my_network
+#  auth:
+#    build:
+#      context: ./auth
+#    container_name: auth
+#    ports:
+#      - "3001:3001"
+#    networks:
+#      - my_network
 
   # Microservice 2
-  offer-management:
-    build:
-      context: ./offer-management
-    container_name: offer-management
-    ports:
-      - "3002:3002"
-    networks:
-      - my_network
+#  offer-management:
+#    build:
+#      context: ./offer-management
+#    container_name: offer-management
+#    ports:
+#      - "3002:3002"
+#    networks:
+#      - my_network
 
   # Microservice 3
   order-management:
@@ -45,15 +94,15 @@ services:
     networks:
       - my_network
 
-  # Microservice 3
-  product-management:
-    build:
-      context: ./product-management
-    container_name: product-management
-    ports:
-      - "3004:3004"
-    networks:
-      - my_network
+  # Microservice 4
+#  product-management:
+#    build:
+#      context: ./product-management
+#    container_name: product-management
+#    ports:
+#      - "3004:3004"
+#    networks:
+#      - my_network
 
 networks:
   my_network:
