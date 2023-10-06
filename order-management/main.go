@@ -1,14 +1,23 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"order-management/helper"
+	"order-management/middlewares/authenticator"
+	"order-management/migrate"
+	"order-management/seed"
 )
 
-func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, World!")
-	})
+func init() {
+	helper.LoadEnvVariables()
+}
 
-	http.ListenAndServe(":3003", nil)
+func main() {
+	var authenticator authenticator.AuthenticatorInterface = authenticator.FakeAuthenticator{}
+
+	if !authenticator.Authenticate() {
+		return
+	}
+
+	migrate.Migrate()
+	seed.Seed()
 }
