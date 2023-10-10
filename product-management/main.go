@@ -21,7 +21,7 @@ func main() {
 
 	product := r.Group("/api/products").Use(middlewares.Authenticate())
 
-	product.GET("/", productController.Getproducts())
+	product.GET("/", productController.GetProducts())
 
 	//products.GET("/:id", productController.Getproducts())
 	//products.POST("/", productController.Getproducts())

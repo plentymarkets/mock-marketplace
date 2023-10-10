@@ -6,5 +6,5 @@ import (
 
 type ProductRepositoryContract interface {
 	GetProducts(page int) ([]models.Product, error, int)
-	CreateProducts(product models.Product)
+	CreateProduct(product models.Product)
 }
