@@ -1,17 +1,20 @@
 version: '3'
 services:
-  # Database service
-  database:
-    image: postgres:latest
-    container_name: my_database
+  auth-database:
+    image: mariadb:latest
+    container_name: auth_database
     environment:
-      POSTGRES_DB: mydb
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+      DATABASE_DRIVER: mariadb
+      MYSQL_DATABASE: authdb
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+      MYSQL_ROOT_PASSWORD: myrootpassword
+      MYSQL_TCP_PORT: 5432
+      MYSQL_DSN: "myuser:mypassword@tcp(localhost:5432)/authdb"
     ports:
       - "5432:5432"
     volumes:
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/auth/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - my_network
 
@@ -26,34 +29,34 @@ services:
       - my_network
 
   # Microservice 2
-  offer-management:
-    build:
-      context: ./offer-management
-    container_name: offer-management
-    ports:
-      - "3002:3002"
-    networks:
-      - my_network
+#  offer-management:
+#    build:
+#      context: ./offer-management
+#    container_name: offer-management
+#    ports:
+#      - "3002:3002"
+#    networks:
+#      - my_network
 
   # Microservice 3
-  order-management:
-    build:
-      context: ./order-management
-    container_name: order-management
-    ports:
-      - "3003:3003"
-    networks:
-      - my_network
+#  order-management:
+#    build:
+#      context: ./order-management
+#    container_name: order-management
+#    ports:
+#      - "3003:3003"
+#    networks:
+#      - my_network
 
   # Microservice 3
-  product-management:
-    build:
-      context: ./product-management
-    container_name: product-management
-    ports:
-      - "3004:3004"
-    networks:
-      - my_network
+#  product-management:
+#    build:
+#      context: ./product-management
+#    container_name: product-management
+#    ports:
+#      - "3004:3004"
+#    networks:
+#      - my_network
 
 networks:
   my_network:
