@@ -1,21 +1,70 @@
 package controllers
 
+import (
+	"crypto/md5"
+	"encoding/hex"
+	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
+	"product-management/pkg/repositories"
+)
+
 type Person struct {
-	ID string `uri:"id" binding:"required,uuid"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
-//type AuthenticateController struct {
-//	authenticateRepository repositories.UserRepositoryContract
-//}
-//
-//func NewAuthenticateController(authenticateRepository repositories.AuthenticateRepositoryContract) AuthenticateController {
-//	return AuthenticateController{
-//		authenticateRepository: authenticateRepository,
-//	}
-//}
-//
-//func (controller *AuthenticateController) GetAll() gin.HandlerFunc {
-//	return func(c *gin.Context) {
-//		c.Done()
-//	}
-//}
+type AuthenticateController struct {
+	userRepository repositories.UserRepositoryContract
+}
+
+func NewAuthenticateController(userRepository repositories.UserRepositoryContract) AuthenticateController {
+	return AuthenticateController{
+		userRepository: userRepository,
+	}
+}
+
+func (controller *AuthenticateController) Authenticate() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var person = Person{}
+		err := c.BindJSON(&person)
+
+		uuid := mdHashing(person.Username)
+
+		// Create request to auth
+
+		user, err := controller.userRepository.FetchByID(uuid)
+
+		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			return
+		}
+
+		user.UUID = uuid
+		user.Token = "tokenFromApiUpdate"
+
+		if user.ID == 0 {
+			user, err = controller.userRepository.Create(user)
+		} else {
+			user, err = controller.userRepository.Update(user)
+		}
+
+		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"Message": "The user has been updated successfully",
+		})
+		c.Done()
+	}
+}
+
+func mdHashing(input string) string {
+	byteInput := []byte(input)
+	md5Hash := md5.Sum(byteInput)
+	return hex.EncodeToString(md5Hash[:]) // create a slice from an array
+}
