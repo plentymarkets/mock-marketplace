@@ -1,13 +1,8 @@
 package models
 
-import (
-	"time"
-)
+import "gorm.io/gorm"
 
 type Product struct {
-	Id          int    `gorm:"primaryKey"`
-	ProductName string `gorm:"<-"`
-	Date        time.Time
-	Deleted     uint `gorm:"<-"`
-	Variants    []Variant
+	gorm.Model
+	Variants []Variant
 }

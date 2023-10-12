@@ -1,9 +1,11 @@
 package database
 
 import (
+	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
+	"os"
 )
 
 type MariaDBDatabase struct {
@@ -22,13 +24,20 @@ func (db *MariaDBDatabase) GetConnection() *gorm.DB {
 
 func createConnection() *gorm.DB {
 
-	//dsn := fmt.Sprintf(
-	//	"%s:%s@tcp(database:3306)/%s",
-	//	os.Getenv("MARIADB_USER"),
-	//	os.Getenv("MARIADB_PASSWORD"),
-	//	os.Getenv("MARIADB_USER"))
+	// Get the database connection details from environment variables
+	dbHost := os.Getenv("MYSQL_TCP_HOST") // Defaults to localhost
+	dbPort := os.Getenv("MYSQL_TCP_PORT") // Defaults to 3306
+	dbUser := os.Getenv("MYSQL_USER")     // Defaults to root
+	dbPass := os.Getenv("MYSQL_PASSWORD") // Defaults to empty string
+	dbName := os.Getenv("MYSQL_DATABASE")
 
-	dsn := "root:myrootpassword@tcp(host.docker.internal:3306)/mydb"
+	// Create the database connection string
+	dsn := fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/%s",
+		dbUser, dbPass, dbHost, dbPort, dbName,
+	)
+
+	//dsn := "root:myrootpassword@tcp(localhost:3306)/mydb"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {

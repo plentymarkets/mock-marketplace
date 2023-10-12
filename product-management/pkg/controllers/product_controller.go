@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"product-management/pkg/repositories"
-	"strconv"
 )
 
 type ProductController struct {
@@ -19,15 +18,7 @@ func NewProductController(productRepository repositories.ProductRepositoryContra
 
 func (controller *ProductController) GetProducts() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
-		pageStr := c.DefaultQuery("page", "1")
-		page, err := strconv.Atoi(pageStr)
-
-		if err != nil {
-			c.AbortWithStatus(http.StatusBadRequest)
-			return
-		}
-
+		page := 1
 		products, err, pageCount := controller.productRepository.GetProducts(page)
 
 		if err != nil {

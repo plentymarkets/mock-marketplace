@@ -7,8 +7,6 @@ services:
     env_file: .env
     ports:
       - "3306:3306"
-    volumes:
-      - ./database:/docker-entrypoint-initdb.d
     networks:
       - my_network
 
@@ -54,6 +52,9 @@ services:
       - ./product-management/go.mod:/app/go.mod
     networks:
       - my_network
+    env_file: .env
+    environment:
+      MYSQL_TCP_HOST: host.docker.internal
 
 networks:
   my_network:

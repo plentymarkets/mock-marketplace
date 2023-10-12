@@ -6,5 +6,5 @@ import (
 
 type Variant struct {
 	gorm.Model
-	ProductId int `gorm:"<-"`
+	ProductID uint `gorm:"<-"`
 }
