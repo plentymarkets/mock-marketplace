@@ -47,9 +47,6 @@ services:
     container_name: product-management
     ports:
       - "3004:3004"
-    volumes:
-      - ./product-management/main.go:/app/main.go
-      - ./product-management/go.mod:/app/go.mod
     networks:
       - my_network
     env_file: .env
