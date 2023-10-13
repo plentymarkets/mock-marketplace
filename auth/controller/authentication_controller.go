@@ -2,16 +2,18 @@ package controller
 
 import (
 	"auth/middleware"
+	"auth/repositories"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 	"os"
+	"time"
 )
 
-func Auth() gin.HandlerFunc {
+func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// c.GetHeader, will give me all headers (secret ones) values
 		apiKey := c.GetHeader("ApiKey")
-		// if for validation == 'null'
+
 		if apiKey == "" {
 			c.JSON(http.StatusUnauthorized, map[string]string{
 				"error": "missing api key",
@@ -19,8 +21,7 @@ func Auth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		// if for validation == true
-		// we hardcode it, in real env we get it from database
+
 		if apiKey != os.Getenv("JWT_SECRET") {
 			c.JSON(http.StatusUnauthorized, map[string]string{
 				"error": "invalid api key",
@@ -29,11 +30,28 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 
-		// implement logic to create user in database
-		// implement logic to read user from database
+		userEmail := c.GetHeader("userEmail")
+		userPassword := c.GetHeader("userPassword")
+
+		userRepository := repositories.NewRepository(databaseConnection)
+		user := userRepository.GetUserByEmail(userEmail)
+
+		if user.Password != userPassword {
+			c.JSON(http.StatusUnauthorized, map[string]string{
+				"error": "invalid credentials",
+			})
+			c.Abort()
+			return
+		}
+
+		if user.TokenExpiration.After(time.Now()) {
+			c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "token is still valid",
+			})
+		}
 
 		// init token, sep function created
-		token, err := middleware.CreateJWT()
+		token, timestamp, err := middleware.CreateJWT()
 		// if error at func above
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{
@@ -43,7 +61,9 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 
-		// implement logic to save JWT token in database for each user
+		user.Token = token
+		user.TokenExpiration = timestamp
+		userRepository.UpdateUser(user)
 
 		// if ok -> save to database
 		c.JSON(http.StatusOK, map[string]string{

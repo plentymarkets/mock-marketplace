@@ -1,7 +1,10 @@
 package main
 
 import (
+	"auth/helper"
 	"auth/migrate"
+	"auth/routes"
+	"auth/seed"
 	"github.com/joho/godotenv"
 	"log"
 	"time"
@@ -31,11 +34,9 @@ func createJWT() (string, error) {
 }
 
 func main() {
-	migrate.Migrate()
-}
+	databaseConnection := helper.GetDatabaseConnection()
 
-//Route zur Authentifizierung -> routes.go
-//Controller -> AuthController der quasi sagt ob man authentifiziert wurde.
-//Entities -> Models -> User (Username, Password, Token)
-//Gorm -> ORM -> User
-//Gin -> HTTP Framework
+	migrate.Migrate(databaseConnection)
+	seed.Seed(databaseConnection)
+	routes.RegisterRoutes(databaseConnection)
+}

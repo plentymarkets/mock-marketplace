@@ -3,17 +3,15 @@ package routes
 import (
 	"auth/controller"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"log"
 )
 
-func RegisterRoutes() {
-	// start default
-	r := gin.Default()
-	// main route /api
-	api := r.Group("/api")
-	// main route /api/auth and call func auth
-	api.POST("/auth", controller.Auth())
-	err := r.Run()
+func RegisterRoutes(databaseConnection *gorm.DB) {
+	router := gin.Default()
+	api := router.Group("/api")
+	api.POST("/auth", controller.Auth(databaseConnection))
+	err := router.Run()
 
 	if err != nil {
 		log.Fatal(err.Error())

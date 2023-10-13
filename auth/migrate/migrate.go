@@ -1,16 +1,11 @@
 package migrate
 
 import (
-	"auth/helper"
 	"auth/models"
-	"fmt"
+	"gorm.io/gorm"
 )
 
-func Migrate() {
-	databaseConnection := helper.GetDatabaseConnection()
-
-	fmt.Println(&models.User{})
-
+func Migrate(databaseConnection *gorm.DB) {
 	err := databaseConnection.AutoMigrate(&models.User{})
 
 	if err != nil {
