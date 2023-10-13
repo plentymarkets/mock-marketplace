@@ -21,11 +21,10 @@ func main() {
 	product := engine.Group("/api/products").Use(middlewares.Authenticate())
 
 	product.GET("/", productController.GetProducts())
-
-	//products.GET("/:id", productController.Getproducts())
-	//products.POST("/", productController.Getproducts())
-	//products.PUT("/", productController.Getproducts())
-	//products.DELETE("/", productController.Getproducts())
+	product.GET("/:id", productController.GetProductByID())
+	product.POST("/", productController.CreateProduct())
+	product.PUT("/", productController.UpdateProduct())
+	product.DELETE("/:id", productController.DeleteProduct())
 
 	err := engine.Run(":3004")
 

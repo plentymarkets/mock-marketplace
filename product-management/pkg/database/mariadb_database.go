@@ -29,7 +29,7 @@ func createConnection() *gorm.DB {
 	dbPort := os.Getenv("MYSQL_TCP_PORT") // Defaults to 3306
 	dbUser := os.Getenv("MYSQL_USER")     // Defaults to root
 	dbPass := os.Getenv("MYSQL_PASSWORD") // Defaults to empty string
-	dbName := os.Getenv("MYSQL_DATABASE")
+	dbName := os.Getenv("MYSQL_DATABASE") // Defaults to database
 
 	// Create the database connection string
 	dsn := fmt.Sprintf(
@@ -37,7 +37,6 @@ func createConnection() *gorm.DB {
 		dbUser, dbPass, dbHost, dbPort, dbName,
 	)
 
-	//dsn := "root:myrootpassword@tcp(localhost:3306)/mydb"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {

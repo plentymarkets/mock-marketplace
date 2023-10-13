@@ -1,10 +1,9 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
-
 type Variant struct {
-	gorm.Model
-	ProductID uint `gorm:"<-"`
+	ID         uint   `gorm:"primarykey"`
+	ProductID  uint   `gorm:"<-"`
+	Name       string `gorm:"<-"`
+	GTIN       string `gorm:"<-"`
+	Attributes int    `gorm:"<-"`
 }
