@@ -26,6 +26,8 @@ func main() {
 	product.PUT("/", productController.UpdateProduct())
 	product.DELETE("/:id", productController.DeleteProduct())
 
+	//product.GET("/test", productController.GetProducts2)
+
 	err := engine.Run(":3004")
 
 	if err != nil {

@@ -17,7 +17,7 @@ func NewProductRepository(gormDB *gorm.DB) ProductRepository {
 
 func (repository *ProductRepository) GetProducts() ([]models.Product, error, string) {
 	var products []models.Product
-	repository.database.Find(&products)
+	repository.database.Model(&models.Product{}).Preload("Variants").Find(&products)
 	return products, nil, "pageCount"
 }
 
@@ -32,11 +32,12 @@ func (repository *ProductRepository) UpdateProduct(product models.Product) (mode
 }
 
 func (repository *ProductRepository) DeleteProduct(id string) {
+	_ = id
 	panic("Delete is not supported for this app")
 }
 
 func (repository *ProductRepository) GetProductByID(id string) (models.Product, error) {
 	var product models.Product
-	repository.database.Find(&product, id)
+	repository.database.Model(&models.Product{}).Preload("Variants").Find(&product, id)
 	return product, nil
 }

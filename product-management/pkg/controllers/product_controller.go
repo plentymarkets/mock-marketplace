@@ -59,8 +59,14 @@ func (controller *ProductController) CreateProduct() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var product = models.Product{}
+		err := c.BindJSON(&product)
 
-		product, err := controller.productRepository.CreateProduct(product)
+		if err != nil {
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+
+		product, err = controller.productRepository.CreateProduct(product)
 
 		if err != nil {
 			return
@@ -76,14 +82,13 @@ func (controller *ProductController) CreateProduct() gin.HandlerFunc {
 
 func (controller *ProductController) UpdateProduct() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var product = models.Product{}
+		err := c.BindJSON(&product)
 
-		id := c.Param("id")
-
-		product, _ := controller.productRepository.GetProductByID(id)
-
-		product.Name = c.PostForm("Name")
-
-		controller.productRepository.UpdateProduct(product)
+		product, err = controller.productRepository.UpdateProduct(product)
+		if err != nil {
+			return
+		}
 
 		c.JSON(http.StatusOK, map[string]any{
 			"message": "Product updated successfully",
@@ -100,7 +105,11 @@ func (controller *ProductController) DeleteProduct() gin.HandlerFunc {
 
 		product.Deleted = true
 
-		controller.productRepository.UpdateProduct(product)
+		product, err := controller.productRepository.UpdateProduct(product)
+		if err != nil {
+
+			return
+		}
 
 		c.JSON(http.StatusOK, map[string]any{
 			"pageCount": "Product with id " + id + " Has been deleted successfully",
