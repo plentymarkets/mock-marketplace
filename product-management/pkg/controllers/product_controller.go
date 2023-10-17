@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"product-management/pkg/models"
 	"product-management/pkg/repositories"
+	"time"
 )
 
 type Person struct {
@@ -90,6 +91,8 @@ func (controller *ProductController) UpdateProduct() gin.HandlerFunc {
 			return
 		}
 
+		time.Sleep(100)
+
 		c.JSON(http.StatusOK, map[string]any{
 			"message": "Product updated successfully",
 			"data":    product,
@@ -101,10 +104,11 @@ func (controller *ProductController) UpdateProduct() gin.HandlerFunc {
 func (controller *ProductController) DeleteProduct() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		product, _ := controller.productRepository.FetchByID(id)
 
+		product, _ := controller.productRepository.FetchByID(id)
 		product.Deleted = true
 
+		time.Sleep(100)
 		product, err := controller.productRepository.Update(product)
 		if err != nil {
 			return
