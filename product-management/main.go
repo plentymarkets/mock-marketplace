@@ -36,7 +36,7 @@ func main() {
 	variantRepository := repositories.NewVariantRepository(mariadb.GetConnection())
 	variantController := controllers.NewVariantController(&variantRepository)
 
-	variant := engine.Group("/api/products").Use(middlewares.Authenticate())
+	variant := engine.Group("/api/variant").Use(middlewares.Authenticate())
 
 	variant.GET("/", variantController.GetAll())
 	variant.GET("/:id", variantController.GetByID())
