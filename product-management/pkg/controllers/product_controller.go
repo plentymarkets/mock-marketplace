@@ -22,7 +22,7 @@ func NewProductController(productRepository repositories.ProductRepositoryContra
 	}
 }
 
-func (controller *ProductController) GetProducts() gin.HandlerFunc {
+func (controller *ProductController) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		products, err, pageCount := controller.productRepository.FetchAll()
 
@@ -39,7 +39,7 @@ func (controller *ProductController) GetProducts() gin.HandlerFunc {
 	}
 }
 
-func (controller *ProductController) GetProductByID() gin.HandlerFunc {
+func (controller *ProductController) GetByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		product, err := controller.productRepository.FetchByID(id)
@@ -56,7 +56,7 @@ func (controller *ProductController) GetProductByID() gin.HandlerFunc {
 	}
 }
 
-func (controller *ProductController) CreateProduct() gin.HandlerFunc {
+func (controller *ProductController) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var product = models.Product{}
@@ -81,7 +81,7 @@ func (controller *ProductController) CreateProduct() gin.HandlerFunc {
 	}
 }
 
-func (controller *ProductController) UpdateProduct() gin.HandlerFunc {
+func (controller *ProductController) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var product = models.Product{}
 		err := c.BindJSON(&product)
@@ -101,7 +101,7 @@ func (controller *ProductController) UpdateProduct() gin.HandlerFunc {
 	}
 }
 
-func (controller *ProductController) DeleteProduct() gin.HandlerFunc {
+func (controller *ProductController) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 
