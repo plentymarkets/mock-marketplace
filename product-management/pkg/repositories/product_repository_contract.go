@@ -5,9 +5,9 @@ import (
 )
 
 type ProductRepositoryContract interface {
-	GetProducts() ([]models.Product, error, string)
-	CreateProduct(product models.Product) (models.Product, error)
-	UpdateProduct(product models.Product) (models.Product, error)
-	DeleteProduct(id string)
-	GetProductByID(id string) (models.Product, error)
+	FetchAll() ([]models.Product, error, string)
+	Create(product models.Product) (models.Product, error)
+	Update(product models.Product) (models.Product, error)
+	Delete(id string)
+	FetchByID(id string) (models.Product, error)
 }

@@ -15,28 +15,28 @@ func NewProductRepository(gormDB *gorm.DB) ProductRepository {
 	return repository
 }
 
-func (repository *ProductRepository) GetProducts() ([]models.Product, error, string) {
+func (repository *ProductRepository) FetchAll() ([]models.Product, error, string) {
 	var products []models.Product
 	repository.database.Model(&models.Product{}).Preload("Variants").Find(&products)
 	return products, nil, "pageCount"
 }
 
-func (repository *ProductRepository) CreateProduct(product models.Product) (models.Product, error) {
+func (repository *ProductRepository) Create(product models.Product) (models.Product, error) {
 	repository.database.Create(&product)
 	return product, nil
 }
 
-func (repository *ProductRepository) UpdateProduct(product models.Product) (models.Product, error) {
+func (repository *ProductRepository) Update(product models.Product) (models.Product, error) {
 	repository.database.Model(&product).Updates(product)
 	return product, nil
 }
 
-func (repository *ProductRepository) DeleteProduct(id string) {
+func (repository *ProductRepository) Delete(id string) {
 	_ = id
 	panic("Delete is not supported for this app")
 }
 
-func (repository *ProductRepository) GetProductByID(id string) (models.Product, error) {
+func (repository *ProductRepository) FetchByID(id string) (models.Product, error) {
 	var product models.Product
 	repository.database.Model(&models.Product{}).Preload("Variants").Find(&product, id)
 	return product, nil
