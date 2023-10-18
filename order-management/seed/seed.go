@@ -9,15 +9,12 @@ import (
 	"time"
 )
 
-var databaseConnection *gorm.DB
-
 func init() {
 	helper.LoadEnvVariables()
-	databaseConnection = helper.GetDatabaseConnection()
 }
 
-func Seed() {
-	orderRepository := repositories.SetupRepository(databaseConnection)
+func Seed(databaseConnection *gorm.DB) {
+	orderRepository := repositories.NewRepository(databaseConnection)
 	order := generateOrder()
 	orderRepository.CreateOrder(order)
 }
@@ -25,6 +22,7 @@ func Seed() {
 func generateOrder() models.Order {
 	order := models.Order{
 		CustomerID:      rand.Int(),
+		SellerID:        rand.Int(),
 		OrderNumber:     "123456789",
 		OrderDate:       time.Now(),
 		Status:          "Created",

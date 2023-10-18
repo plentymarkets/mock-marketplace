@@ -9,6 +9,7 @@ type Order struct {
 	gorm.Model
 	ID              uint      `gorm:"primaryKey"`
 	CustomerID      int       `gorm:"type:int"`
+	SellerID        int       `gorm:"type:int"`
 	OrderNumber     string    `gorm:"type:varchar(255)"`
 	OrderDate       time.Time `gorm:"type:datetime"`
 	Status          string    `gorm:"type:varchar(50)"`

@@ -7,14 +7,11 @@ import (
 	"reflect"
 )
 
-var databaseConnection *gorm.DB
-
 func init() {
 	helper.LoadEnvVariables()
-	databaseConnection = helper.GetDatabaseConnection()
 }
 
-func Migrate() {
+func Migrate(databaseConnection *gorm.DB) {
 	modelCollection := []interface{}{
 		&models.Order{},
 		&models.OrderItem{},

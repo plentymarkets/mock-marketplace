@@ -2,8 +2,9 @@ package main
 
 import (
 	"order-management/helper"
-	"order-management/middlewares/authenticator"
 	"order-management/migrate"
+	"order-management/repositories"
+	"order-management/routes"
 	"order-management/seed"
 )
 
@@ -12,12 +13,12 @@ func init() {
 }
 
 func main() {
-	var authenticator authenticator.AuthenticatorInterface = authenticator.FakeAuthenticator{}
+	databaseConnection := helper.GetDatabaseConnection()
+	migrate.Migrate(databaseConnection)
+	seed.Seed(databaseConnection)
+	routes.RegisterRoutes(databaseConnection)
 
-	if !authenticator.Authenticate() {
-		return
-	}
-
-	migrate.Migrate()
-	seed.Seed()
+	orderRepository := repositories.NewRepository(databaseConnection)
+	orders := orderRepository.GetOrdersBySellerId(6944156350795021744)
+	println(orders)
 }
