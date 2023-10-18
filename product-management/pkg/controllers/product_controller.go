@@ -23,21 +23,23 @@ func NewProductController(productRepository repositories.ProductRepositoryContra
 	}
 }
 
-func (controller *ProductController) Get() gin.HandlerFunc {
+func (controller *ProductController) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		pageStr := c.DefaultQuery("page", "1")
 		page, err := strconv.Atoi(pageStr)
 
 		if err != nil {
-			c.AbortWithStatus(http.StatusBadRequest)
+			// TODO - Log error to file
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Invalid page number"})
 			return
 		}
 
 		products, err, pageCount := controller.productRepository.FetchAll(page)
 
 		if err != nil {
-			c.AbortWithStatus(http.StatusBadRequest)
+			// TODO - Log error to file
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		}
 

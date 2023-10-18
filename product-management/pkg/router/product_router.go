@@ -14,7 +14,7 @@ func ProductRouter(mariadb database.MariaDBDatabase, engine *gin.Engine) {
 
 	product := engine.Group("/api/product").Use(middlewares.Authenticate())
 
-	product.GET("/", productController.Get())
+	product.GET("/", productController.GetAll())
 	product.GET("/:id", productController.GetByID())
 	product.POST("/", productController.Create())
 	product.PUT("/", productController.Update())

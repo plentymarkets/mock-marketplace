@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"math"
 	"product-management/pkg/models"
@@ -39,7 +40,7 @@ func (repository *ProductRepository) FetchAll(page int) ([]models.Product, error
 	}
 
 	if page < 1 || page > pageCount {
-		return nil, errors.New("bad request"), 0
+		return nil, errors.New(fmt.Sprintf("invalid page number the page should be grater than 0 and lower than %d", pageCount+1)), 0
 	}
 
 	offset := (page - 1) * productsPerPage
