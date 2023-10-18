@@ -1,7 +1,9 @@
 package repositories
 
 import (
+	"errors"
 	"gorm.io/gorm"
+	"math"
 	"product-management/pkg/models"
 )
 
@@ -21,10 +23,32 @@ func (repository *ProductRepository) FetchByID(id string) (models.Product, error
 	return product, nil
 }
 
-func (repository *ProductRepository) FetchAll() ([]models.Product, error, string) {
+func (repository *ProductRepository) FetchAll(page int) ([]models.Product, error, int) {
+
 	var products []models.Product
-	repository.database.Model(&models.Product{}).Preload("Variants").Find(&products)
-	return products, nil, "pageCount"
+
+	var ordersCount int64
+	if err := repository.database.Table("products").Count(&ordersCount).Error; err != nil {
+		return nil, err, 0
+	}
+
+	const productsPerPage = 3
+	pageCount := int(math.Ceil(float64(ordersCount) / float64(productsPerPage)))
+	if pageCount == 0 {
+		pageCount = 1
+	}
+
+	if page < 1 || page > pageCount {
+		return nil, errors.New("bad request"), 0
+	}
+
+	offset := (page - 1) * productsPerPage
+	if err := repository.database.Limit(productsPerPage).Offset(offset).
+		Preload("Variants").Find(&products).Error; err != nil {
+		return nil, err, 0
+	}
+
+	return products, nil, pageCount
 }
 
 func (repository *ProductRepository) Create(product models.Product) (models.Product, error) {

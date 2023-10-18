@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"product-management/pkg/models"
 	"product-management/pkg/repositories"
+	"strconv"
 	"time"
 )
 
@@ -24,7 +25,16 @@ func NewProductController(productRepository repositories.ProductRepositoryContra
 
 func (controller *ProductController) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		products, err, pageCount := controller.productRepository.FetchAll()
+
+		pageStr := c.DefaultQuery("page", "1")
+		page, err := strconv.Atoi(pageStr)
+
+		if err != nil {
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+
+		products, err, pageCount := controller.productRepository.FetchAll(page)
 
 		if err != nil {
 			c.AbortWithStatus(http.StatusBadRequest)
