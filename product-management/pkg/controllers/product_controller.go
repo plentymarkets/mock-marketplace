@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"product-management/pkg/models"
@@ -37,9 +38,15 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 
 		products, err, pageCount := controller.productRepository.FetchAll(page)
 
+		if page < 1 || page > pageCount {
+			// TODO - Log error to file
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("invalid page number the page should be grater than 0 and lower than %d", pageCount+1)})
+			return
+		}
+
 		if err != nil {
 			// TODO - Log error to file
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		}
 
