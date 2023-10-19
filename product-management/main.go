@@ -12,8 +12,8 @@ func main() {
 	engine := gin.Default()
 	mariadb := database.NewMariaDBDatabase()
 
-	router.ProductRouter(mariadb, engine)
-	router.VariantRouter(mariadb, engine)
+	router.Product(mariadb, engine)
+	router.Variant(mariadb, engine)
 
 	err := engine.Run(":3004")
 

@@ -8,7 +8,7 @@ import (
 	"product-management/pkg/repositories"
 )
 
-func VariantRouter(mariadb database.MariaDBDatabase, engine *gin.Engine) {
+func Variant(mariadb database.MariaDBDatabase, engine *gin.Engine) {
 
 	variantRepository := repositories.NewVariantRepository(mariadb.GetConnection())
 	variantController := controllers.NewVariantController(&variantRepository)

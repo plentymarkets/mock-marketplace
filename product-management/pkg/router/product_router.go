@@ -8,7 +8,7 @@ import (
 	"product-management/pkg/repositories"
 )
 
-func ProductRouter(mariadb database.MariaDBDatabase, engine *gin.Engine) {
+func Product(mariadb database.MariaDBDatabase, engine *gin.Engine) {
 	productRepository := repositories.NewProductRepository(mariadb.GetConnection())
 	productController := controllers.NewProductController(&productRepository)
 

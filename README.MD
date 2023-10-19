@@ -1,4 +1,4 @@
-# Mock-Marketpalce
+# Mock-Marketplace
 
 ## installation
 
