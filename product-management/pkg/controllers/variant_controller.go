@@ -20,6 +20,7 @@ func NewVariantController(variantRepository repositories.VariantRepositoryContra
 
 func (controller *VariantController) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		pageStr := c.DefaultQuery("page", "1")
 		page, err := strconv.Atoi(pageStr)
 		variants, pageCount, err := controller.variantRepository.FetchAll(page, 10)
@@ -102,6 +103,8 @@ func (controller *VariantController) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		variant, _ := controller.variantRepository.FetchById(id)
+
+		variant.Deleted = true
 
 		variant, err := controller.variantRepository.Update(variant)
 		if err != nil {

@@ -6,4 +6,5 @@ type Variant struct {
 	Name       string `gorm:"<-" json:"name,omitempty"`
 	GTIN       string `gorm:"<-" json:"gtin,omitempty"`
 	Attributes int    `gorm:"<-" json:"attributes,omitempty"`
+	Deleted    bool   `gorm:"<-" json:"deleted"` // TODO - If the deleted is required, the request fails with error
 }

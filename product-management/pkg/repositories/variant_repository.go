@@ -38,7 +38,7 @@ func (repository *VariantRepository) FetchAll(page int, variantsPerPage int) ([]
 
 	offset := (page - 1) * variantsPerPage
 	if err := repository.database.Limit(variantsPerPage).Offset(offset).
-		Preload("Variants").Find(&variants).Error; err != nil {
+		Find(&variants).Error; err != nil {
 		return nil, 0, err
 	}
 	return variants, pageCount, nil
