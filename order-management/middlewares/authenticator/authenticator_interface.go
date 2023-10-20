@@ -1,5 +1,8 @@
 package authenticator
 
+import "github.com/gin-gonic/gin"
+
 type AuthenticatorInterface interface {
-	Authenticate() bool
+	NewAuthenticator(authenticatorServiceUrl string) AuthenticatorInterface
+	Authenticate() gin.HandlerFunc
 }

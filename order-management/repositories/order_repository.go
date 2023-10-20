@@ -10,6 +10,8 @@ type OrderRepository struct {
 }
 
 func NewRepository(databaseConnection *gorm.DB) OrderRepository {
+	// What happens if databaseConnection is nil.
+	// Sentintel errors
 	repository := OrderRepository{}
 	repository.databaseConnection = databaseConnection
 	return repository

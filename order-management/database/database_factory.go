@@ -10,8 +10,6 @@ func CreateDatabase(driver, dsn string) (DatabaseInterface, error) {
 	case "mariadb":
 		db = &MariaDBDatabase{}
 		err = db.SetupDatabase(dsn)
-	case "mysql":
-		// instantiate MySQL and other databases similarly
 	default:
 		return nil, fmt.Errorf("unknown driver: %s", driver)
 	}
