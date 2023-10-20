@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"product-management/pkg/models"
 	"product-management/pkg/repositories"
@@ -36,7 +37,7 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 			return
 		}
 
-		products, err, pageCount := controller.productRepository.FetchAll(page)
+		products, pageCount, err := controller.productRepository.FetchAll(page, 10)
 
 		if page < 1 || page > pageCount {
 			// TODO - Log error to file
@@ -68,9 +69,15 @@ func (controller *ProductController) GetByID() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, map[string]any{
-			"data": product,
-		})
+		if product.ID == 0 {
+			c.JSON(http.StatusOK, map[string]any{
+				"data": nil,
+			})
+		} else {
+			c.JSON(http.StatusOK, map[string]any{
+				"data": product,
+			})
+		}
 		c.Done()
 	}
 }
@@ -82,6 +89,7 @@ func (controller *ProductController) Create() gin.HandlerFunc {
 		err := c.BindJSON(&product)
 
 		if err != nil {
+			log.Println(err)
 			c.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
@@ -89,6 +97,7 @@ func (controller *ProductController) Create() gin.HandlerFunc {
 		product, err = controller.productRepository.Create(product)
 
 		if err != nil {
+			c.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
 

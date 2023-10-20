@@ -51,7 +51,7 @@ services:
       - my_network
     env_file: .env
     environment:
-      MYSQL_TCP_HOST: host.docker.internal
+      MYSQL_TCP_HOST: host.docker.internal  # Change so that the app uses the docker internal network
 
 networks:
   my_network:

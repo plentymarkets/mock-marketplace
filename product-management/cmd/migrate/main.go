@@ -7,14 +7,16 @@ import (
 )
 
 func main() {
-	db := database.NewMariaDBDatabase()
+	dsn := database.GetMariaDBDSN()
 
-	err := db.GetConnection().AutoMigrate(&models.Product{})
+	db := database.CreateConnection(dsn)
+
+	err := db.AutoMigrate(&models.Product{})
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	err2 := db.GetConnection().AutoMigrate(&models.Variant{})
+	err2 := db.AutoMigrate(&models.Variant{})
 	if err2 != nil {
 		log.Fatal(err2.Error())
 	}

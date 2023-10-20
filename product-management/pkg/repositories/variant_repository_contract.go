@@ -5,9 +5,9 @@ import (
 )
 
 type VariantRepositoryContract interface {
-	FetchAllByID(id string) (models.Variant, error)
-	FetchAll() ([]models.Variant, error, string)
+	FetchAll(page int, variantsPerPage int) ([]models.Variant, int, error)
+	FetchById(id string) (models.Variant, error)
+	FetchByProductId() ([]models.Variant, error)
 	Create(variant models.Variant) (models.Variant, error)
 	Update(variant models.Variant) (models.Variant, error)
-	Delete(id string)
 }

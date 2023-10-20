@@ -8,12 +8,13 @@ import (
 )
 
 func main() {
-
 	engine := gin.Default()
-	mariadb := database.NewMariaDBDatabase()
 
-	router.Product(mariadb, engine)
-	router.Variant(mariadb, engine)
+	dsn := database.GetMariaDBDSN()
+	con := database.CreateConnection(dsn)
+
+	router.Product(con, engine)
+	router.Variant(con, engine)
 
 	err := engine.Run(":3004")
 

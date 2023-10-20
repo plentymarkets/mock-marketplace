@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"product-management/pkg/models"
 	"product-management/pkg/repositories"
+	"strconv"
 )
 
 type VariantController struct {
@@ -19,7 +20,9 @@ func NewVariantController(variantRepository repositories.VariantRepositoryContra
 
 func (controller *VariantController) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		variants, err, pageCount := controller.variantRepository.FetchAll()
+		pageStr := c.DefaultQuery("page", "1")
+		page, err := strconv.Atoi(pageStr)
+		variants, pageCount, err := controller.variantRepository.FetchAll(page, 10)
 
 		if err != nil {
 			c.AbortWithStatus(http.StatusBadRequest)
@@ -37,7 +40,8 @@ func (controller *VariantController) GetAll() gin.HandlerFunc {
 func (controller *VariantController) GetByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		variant, err := controller.variantRepository.FetchAllByID(id)
+
+		variant, err := controller.variantRepository.FetchById(id)
 
 		if err != nil {
 			c.AbortWithStatus(http.StatusBadRequest)
@@ -97,7 +101,7 @@ func (controller *VariantController) Update() gin.HandlerFunc {
 func (controller *VariantController) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		variant, _ := controller.variantRepository.FetchAllByID(id)
+		variant, _ := controller.variantRepository.FetchById(id)
 
 		variant, err := controller.variantRepository.Update(variant)
 		if err != nil {

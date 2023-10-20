@@ -2,15 +2,17 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"product-management/pkg/controllers"
-	"product-management/pkg/database"
 	"product-management/pkg/middlewares"
 	"product-management/pkg/repositories"
 )
 
-func Product(mariadb database.MariaDBDatabase, engine *gin.Engine) {
-	productRepository := repositories.NewProductRepository(mariadb.GetConnection())
-	productController := controllers.NewProductController(&productRepository)
+func Product(mariadb *gorm.DB, engine *gin.Engine) {
+
+	// Homework = Check what the Engin
+	productRepository, _ := repositories.NewProductRepository(mariadb)
+	productController := controllers.NewProductController(productRepository)
 
 	product := engine.Group("/api/product").Use(middlewares.Authenticate())
 
