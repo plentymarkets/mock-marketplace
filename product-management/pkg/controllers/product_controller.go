@@ -82,14 +82,14 @@ func (controller *ProductController) GetByID() gin.HandlerFunc {
 	}
 }
 
-func (controller *ProductController) Create() gin.HandlerFunc {
+func (controller *ProductController) Create() gin.HandlerFunc { // todo - If the VariantID is provided, it can change data in Variants !!!
 	return func(c *gin.Context) {
 
 		var product = models.Product{}
 		err := c.BindJSON(&product)
 
 		if err != nil {
-			log.Println(err)
+			log.Println(err.Error())
 			c.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
@@ -109,7 +109,7 @@ func (controller *ProductController) Create() gin.HandlerFunc {
 	}
 }
 
-func (controller *ProductController) Update() gin.HandlerFunc {
+func (controller *ProductController) Update() gin.HandlerFunc { // todo - investigate changes on the variant when changing the product.
 	return func(c *gin.Context) {
 		var product = models.Product{}
 		err := c.BindJSON(&product)
