@@ -34,7 +34,7 @@ services:
     container_name: product_management_database
     env_file: .env
     ports:
-      - "3306:3306"
+      - "3304:3306"
     networks:
       - my_network
 
@@ -97,8 +97,6 @@ services:
       - my_network
     depends_on:
       - product-management-database
-    environment:
-      MYSQL_TCP_HOST: host.docker.internal  # Change so that the app uses the docker internal network
 
 networks:
   my_network:
