@@ -41,7 +41,7 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 
 		if page < 1 || page > pageCount {
 			// TODO - Log error to file
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("invalid page number the page should be grater than 0 and lower than %d", pageCount+1)})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("Invalid page number! Please selet a page from 1 to %d", pageCount)})
 			return
 		}
 
