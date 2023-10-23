@@ -1,9 +1,37 @@
 version: '3'
 services:
-  # Database service
-  database:
+#   Database service
+
+  auth-database:
     image: mariadb:latest
-    container_name: my_mariadb_db
+    container_name: auth_database
+    env_file: .env
+    ports:
+      - "3301:3306"
+    networks:
+      - my_network
+
+  offer-management-database:
+    image: mariadb:latest
+    container_name: offer_management_database
+    env_file: .env
+    ports:
+      - "3302:3306"
+    networks:
+      - my_network
+
+  order-management-database:
+    image: mariadb:latest
+    container_name: order_management_database
+    env_file: .env
+    ports:
+      - "3303:3306"
+    networks:
+      - my_network
+
+  product-management-database:
+    image: mariadb:latest
+    container_name: product_management_database
     env_file: .env
     ports:
       - "3306:3306"
@@ -17,8 +45,13 @@ services:
     container_name: auth
     ports:
       - "3001:3001"
+    env_file: .env
+    environment:
+      MYSQL_TCP_HOST: host.docker.internal
     networks:
       - my_network
+    depends_on:
+      - auth-database
 
   # Microservice 2
   offer-management:
@@ -27,8 +60,13 @@ services:
     container_name: offer-management
     ports:
       - "3002:3002"
+    env_file: .env
+    environment:
+      MYSQL_TCP_HOST: host.docker.internal
     networks:
       - my_network
+    depends_on:
+      - offer-management-database
 
   # Microservice 3
   order-management:
@@ -37,8 +75,13 @@ services:
     container_name: order-management
     ports:
       - "3003:3003"
+    env_file: .env
+    environment:
+      MYSQL_TCP_HOST: host.docker.internal
     networks:
       - my_network
+    depends_on:
+      - order-management-database
 
   # Microservice 3
   product-management:
@@ -47,9 +90,13 @@ services:
     container_name: product-management
     ports:
       - "3004:3004"
+    env_file: .env
+    environment:
+      MYSQL_TCP_HOST: host.docker.internal
     networks:
       - my_network
-    env_file: .env
+    depends_on:
+      - product-management-database
     environment:
       MYSQL_TCP_HOST: host.docker.internal  # Change so that the app uses the docker internal network
 
