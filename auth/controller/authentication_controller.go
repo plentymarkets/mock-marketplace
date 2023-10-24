@@ -30,13 +30,13 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		userEmail := c.GetHeader("userEmail")
-		userPassword := c.GetHeader("userPassword")
+		email := c.GetHeader("email")
+		password := c.GetHeader("password")
 
 		userRepository := repositories.NewRepository(databaseConnection)
-		user := userRepository.GetUserByEmail(userEmail)
+		user := userRepository.GetUserByEmail(email)
 
-		if user.Password != userPassword {
+		if user.Password != password {
 			c.JSON(http.StatusUnauthorized, map[string]string{
 				"error": "invalid credentials",
 			})
@@ -46,13 +46,12 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 
 		if user.TokenExpiration.After(time.Now()) {
 			c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": "token is still valid",
+				"error": "token is expired",
 			})
 		}
 
-		// init token, sep function created
 		token, timestamp, err := middleware.CreateJWT()
-		// if error at func above
+
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": "could not generate token",
@@ -65,7 +64,6 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 		user.TokenExpiration = timestamp
 		userRepository.UpdateUser(user)
 
-		// if ok -> save to database
 		c.JSON(http.StatusOK, map[string]string{
 			"token": token,
 		})
