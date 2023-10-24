@@ -9,9 +9,9 @@ type MariaDBDatabase struct {
 	db *gorm.DB
 }
 
-func (db *MariaDBDatabase) SetupDatabase(dsn string) error {
+func (db *MariaDBDatabase) SetupDatabase(dataSourceName string) error {
 	var err error
-	db.db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db.db, err = gorm.Open(mysql.Open(dataSourceName), &gorm.Config{})
 	return err
 }
 

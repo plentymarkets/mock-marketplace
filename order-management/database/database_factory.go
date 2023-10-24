@@ -2,21 +2,18 @@ package database
 
 import "fmt"
 
-func CreateDatabase(driver, dsn string) (DatabaseInterface, error) {
-	var db DatabaseInterface
+func CreateDatabase(driver, dsn string) (Database, error) {
+	var database Database
 	var err error
 
 	switch driver {
 	case "mariadb":
-		db = &MariaDBDatabase{}
-		err = db.SetupDatabase(dsn)
+		database = &MariaDBDatabase{}
+		err = database.SetupDatabase(dsn)
 	default:
-		return nil, fmt.Errorf("unknown driver: %s", driver)
+		database = nil
+		err = fmt.Errorf("unknown driver: %s", driver)
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return database, err
 }

@@ -2,7 +2,7 @@ package database
 
 import "gorm.io/gorm"
 
-type DatabaseInterface interface {
+type Database interface {
 	SetupDatabase(dsn string) error
 	GetConnection() *gorm.DB
 }

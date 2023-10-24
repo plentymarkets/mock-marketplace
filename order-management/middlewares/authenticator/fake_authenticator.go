@@ -4,7 +4,7 @@ import "github.com/gin-gonic/gin"
 
 type FakeAuthenticator struct{}
 
-func (authenticator FakeAuthenticator) NewAuthenticator(string) AuthenticatorInterface {
+func (authenticator FakeAuthenticator) NewAuthenticator(string) Authenticator {
 	return authenticator
 }
 

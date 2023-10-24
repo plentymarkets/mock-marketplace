@@ -5,21 +5,18 @@ import (
 	"gorm.io/gorm"
 	"order-management/controllers"
 	"order-management/middlewares/authenticator"
+	"os"
 )
 
-func RegisterRoutes(databaseConnection *gorm.DB, authenticator authenticator.AuthenticatorInterface) {
+func RegisterRoutes(databaseConnection *gorm.DB, authenticator authenticator.Authenticator) {
 	orderController := controllers.OrderController{}
 
 	router := gin.Default()
 
-	routes := router.Group("/api/orders").Use(authenticator.Authenticate())
-	// All these routes should be protected by authentication via .use(middlewares.Authenticate())
-	//routes.GET("/create", orderController.CreateOrder())
-	//routes.GET("/update/status/:id", orderController.UpdateOrderStatus())
-	routes.GET("/get/:sellerId", orderController.GetOrders(databaseConnection))
-	//routes.GET("/get/:sellerId/:id", orderController.GetOrderById())
+	routes := router.Group("/orders").Use(authenticator.Authenticate())
+	routes.POST("/get", orderController.GetOrders(databaseConnection))
 
-	err := router.Run()
+	err := router.Run(os.Getenv("GIN_PORT"))
 
 	if err != nil {
 		panic(err.Error())

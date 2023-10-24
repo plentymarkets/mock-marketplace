@@ -3,20 +3,15 @@ package seed
 import (
 	"gorm.io/gorm"
 	"math/rand"
-	"order-management/helper"
 	"order-management/models"
 	"order-management/repositories"
 	"time"
 )
 
-func init() {
-	helper.LoadEnvVariables()
-}
-
 func Seed(databaseConnection *gorm.DB) {
 	orderRepository := repositories.NewRepository(databaseConnection)
 	order := generateOrder()
-	orderRepository.CreateOrder(order)
+	orderRepository.DatabaseConnection.Create(&order)
 }
 
 func generateOrder() models.Order {

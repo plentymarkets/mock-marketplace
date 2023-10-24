@@ -25,7 +25,7 @@ func (controller *OrderController) UpdateOrderStatus() gin.HandlerFunc {
 func (controller *OrderController) GetOrders(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//token := c.GetHeader("Authorization")
-		sellerId, err := strconv.Atoi(c.Param("sellerId"))
+		sellerId, err := strconv.Atoi(c.GetHeader("sellerId"))
 
 		if err != nil {
 			c.JSON(http.StatusBadRequest, map[string]string{

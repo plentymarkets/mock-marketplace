@@ -7,13 +7,14 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"order-management/providers"
+	"os"
 )
 
 type JwtAuthenticator struct {
 	AuthenticationServiceUrl string
 }
 
-func (authenticator JwtAuthenticator) NewAuthenticator(authenticatorServiceUrl string) AuthenticatorInterface {
+func (authenticator JwtAuthenticator) NewAuthenticator(authenticatorServiceUrl string) Authenticator {
 	if authenticatorServiceUrl == "" {
 		panic("authenticator service url is required")
 	}
@@ -24,8 +25,8 @@ func (authenticator JwtAuthenticator) NewAuthenticator(authenticatorServiceUrl s
 
 func (authenticator JwtAuthenticator) Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userEmail := c.GetHeader("userEmail")
-		userPassword := c.GetHeader("userPassword")
+		userEmail := c.GetHeader("email")
+		userPassword := c.GetHeader("password")
 
 		if userEmail == "" {
 			c.JSON(http.StatusUnauthorized, map[string]string{
@@ -45,7 +46,15 @@ func (authenticator JwtAuthenticator) Authenticate() gin.HandlerFunc {
 
 		token, err := providers.FetchToken(authenticator.AuthenticationServiceUrl, userEmail, userPassword)
 
-		authentication, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "could not fetch token",
+			})
+			c.Abort()
+			return
+		}
+
+		authentication, err := jwt.Parse(token.Token, func(t *jwt.Token) (interface{}, error) {
 			_, ok := t.Method.(*jwt.SigningMethodHMAC)
 
 			if !ok {
@@ -56,19 +65,19 @@ func (authenticator JwtAuthenticator) Authenticate() gin.HandlerFunc {
 				return "", errors.New("something went wrong")
 			}
 
-			return []byte(config.Get("JWT_SECRET")), nil
+			return []byte(os.Getenv("API_KEY")), nil
 		})
 
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": "could not validate token",
+				"error": err.Error(),
 			})
 			c.Abort()
 			return
 		}
 
-		if !token.Valid {
+		if !authentication.Valid {
 			c.JSON(http.StatusUnauthorized, map[string]string{
 				"error": "invalid header token",
 			})

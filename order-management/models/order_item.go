@@ -14,3 +14,7 @@ type OrderItem struct {
 	Quantity int     `gorm:"type:int"`
 	SKU      string  `gorm:"type:varchar(255)"`
 }
+
+func (OrderItem OrderItem) Migrate(databaseConnection *gorm.DB) error {
+	return databaseConnection.AutoMigrate(OrderItem)
+}

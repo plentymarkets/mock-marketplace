@@ -2,26 +2,19 @@ package migrate
 
 import (
 	"gorm.io/gorm"
-	"order-management/helper"
 	"order-management/models"
-	"reflect"
 )
 
-func init() {
-	helper.LoadEnvVariables()
-}
-
 func Migrate(databaseConnection *gorm.DB) {
-	modelCollection := []interface{}{
-		&models.Order{},
-		&models.OrderItem{},
+	modelCollection := map[string]Migrateable{
+		"order":      models.Order{},
+		"order_item": models.OrderItem{},
 	}
 
-	for _, model := range modelCollection {
-		err := databaseConnection.AutoMigrate(model)
+	for modelName, model := range modelCollection {
+		err := model.Migrate(databaseConnection)
 		if err != nil {
-			modelType := reflect.TypeOf(model).Elem().Name()
-			panic("Could not migrate " + modelType + " model")
+			panic("Could not migrate " + modelName + " model")
 		}
 	}
 }

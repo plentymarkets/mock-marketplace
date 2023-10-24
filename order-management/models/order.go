@@ -6,7 +6,6 @@ import (
 )
 
 type Order struct {
-	gorm.Model
 	ID              uint      `gorm:"primaryKey"`
 	CustomerID      int       `gorm:"type:int"`
 	SellerID        int       `gorm:"type:int"`
@@ -17,4 +16,8 @@ type Order struct {
 	BillingAddress  string    `gorm:"type:varchar(255)"`
 	ShippingAddress string    `gorm:"type:varchar(255)"`
 	OrderItems      []OrderItem
+}
+
+func (Order Order) Migrate(databaseConnection *gorm.DB) error {
+	return databaseConnection.AutoMigrate(Order)
 }
