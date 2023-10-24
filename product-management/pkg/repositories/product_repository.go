@@ -52,11 +52,12 @@ func (repository *ProductRepository) FetchAll(page int, productsPerPage int) ([]
 }
 
 func (repository *ProductRepository) Create(product models.Product) (models.Product, error) {
-	repository.database.Create(&product) // Todo Error handling
-	return product, nil
+	product.ID = 0 // Remove the possibility of giving the ID in the request
+	tx := repository.database.Create(&product)
+	return product, tx.Error
 }
 
 func (repository *ProductRepository) Update(product models.Product) (models.Product, error) {
-	repository.database.Model(&product).Updates(product) // Todo Error handling
-	return product, nil
+	tx := repository.database.Model(&product).Updates(product)
+	return product, tx.Error
 }

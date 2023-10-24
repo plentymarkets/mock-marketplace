@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const ProductsPerPage = 10
+
 type Person struct {
 	ID string `uri:"id" binding:"required,uuid"`
 }
@@ -32,22 +34,22 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 		page, err := strconv.Atoi(pageStr)
 
 		if err != nil {
-			// TODO - Log error to file
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Invalid page number"})
+			log.Printf("Invalid page number unsupported format %s", err.Error())
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Invalid page number format! Page number should be an integer."})
 			return
 		}
 
-		products, pageCount, err := controller.productRepository.FetchAll(page, 10)
-
-		if page < 1 || page > pageCount {
-			// TODO - Log error to file
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("Invalid page number! Please selet a page from 1 to %d", pageCount)})
-			return
-		}
+		products, pageCount, err := controller.productRepository.FetchAll(page, ProductsPerPage)
 
 		if err != nil {
-			// TODO - Log error to file
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+			return
+		}
+
+		if page < 1 || page > pageCount {
+			log.Println("Invalid page number!")
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("Invalid page number! Please selet a page from 1 to %d", pageCount)})
 			return
 		}
 
@@ -62,10 +64,19 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 func (controller *ProductController) GetByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
+		_, err := strconv.Atoi(id)
+
+		if err != nil {
+			log.Printf("Invalid product ID %s", err.Error())
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Invalid Request: ProductID should be an integer value"})
+			return
+		}
+
 		product, err := controller.productRepository.FetchByID(id)
 
 		if err != nil {
-			c.AbortWithStatus(http.StatusBadRequest)
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
 			return
 		}
 
@@ -90,14 +101,15 @@ func (controller *ProductController) Create() gin.HandlerFunc { // todo - If the
 
 		if err != nil {
 			log.Println(err.Error())
-			c.AbortWithStatus(http.StatusBadRequest)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		}
 
 		product, err = controller.productRepository.Create(product)
 
 		if err != nil {
-			c.AbortWithStatus(http.StatusBadRequest)
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
 			return
 		}
 
@@ -114,8 +126,17 @@ func (controller *ProductController) Update() gin.HandlerFunc { // todo - invest
 		var product = models.Product{}
 		err := c.BindJSON(&product)
 
-		product, err = controller.productRepository.Update(product)
 		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			return
+		}
+
+		product, err = controller.productRepository.Update(product)
+
+		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
 			return
 		}
 
@@ -133,12 +154,20 @@ func (controller *ProductController) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 
-		product, _ := controller.productRepository.FetchByID(id)
+		product, err := controller.productRepository.FetchByID(id)
+		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+			return
+		}
+
 		product.Deleted = true
 
 		time.Sleep(100)
-		product, err := controller.productRepository.Update(product)
+		product, err = controller.productRepository.Update(product)
 		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
 			return
 		}
 
