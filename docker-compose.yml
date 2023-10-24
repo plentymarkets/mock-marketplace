@@ -1,17 +1,40 @@
 version: '3'
 services:
-  # Database service
-  database:
-    image: postgres:latest
-    container_name: my_database
-    environment:
-      POSTGRES_DB: mydb
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+#   Database service
+
+  auth-database:
+    image: mariadb:latest
+    container_name: auth_database
+    env_file: .env
     ports:
-      - "5432:5432"
-    volumes:
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - "3301:3306"
+    networks:
+      - my_network
+
+  offer-management-database:
+    image: mariadb:latest
+    container_name: offer_management_database
+    env_file: .env
+    ports:
+      - "3302:3306"
+    networks:
+      - my_network
+
+  order-management-database:
+    image: mariadb:latest
+    container_name: order_management_database
+    env_file: .env
+    ports:
+      - "3303:3306"
+    networks:
+      - my_network
+
+  product-management-database:
+    image: mariadb:latest
+    container_name: product_management_database
+    env_file: .env
+    ports:
+      - "3304:3306"
     networks:
       - my_network
 
@@ -22,8 +45,11 @@ services:
     container_name: auth
     ports:
       - "3001:3001"
+    env_file: .env
     networks:
       - my_network
+    depends_on:
+      - auth-database
 
   # Microservice 2
   offer-management:
@@ -32,8 +58,11 @@ services:
     container_name: offer-management
     ports:
       - "3002:3002"
+    env_file: .env
     networks:
       - my_network
+    depends_on:
+      - offer-management-database
 
   # Microservice 3
   order-management:
@@ -42,18 +71,33 @@ services:
     container_name: order-management
     ports:
       - "3003:3003"
+    env_file: .env
     networks:
       - my_network
+    depends_on:
+      - order-management-database
 
-  # Microservice 3
+  # Microservice 4
   product-management:
     build:
       context: ./product-management
     container_name: product-management
     ports:
       - "3004:3004"
+    env_file: .env
     networks:
       - my_network
+    depends_on:
+      - product-management-database
 
+  # Microservice 5
+  api-gateway:
+    build:
+      context: api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - my_network
 networks:
   my_network:
