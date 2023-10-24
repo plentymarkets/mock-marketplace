@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 type Token struct {
@@ -19,6 +20,7 @@ func FetchToken(url string, email string, password string) (*Token, error) {
 		return nil, err
 	}
 
+	request.Header.Add("ApiKey", os.Getenv("API_KEY"))
 	request.Header.Add("email", email)
 	request.Header.Add("password", password)
 

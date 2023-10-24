@@ -2,8 +2,8 @@ package authenticator
 
 import "fmt"
 
-func CreateAuthenticator(driver string) (AuthenticatorInterface, error) {
-	var authenticator AuthenticatorInterface
+func NewAuthenticator(driver string) (Authenticator, error) {
+	var authenticator Authenticator
 	var err error
 
 	switch driver {
@@ -12,12 +12,9 @@ func CreateAuthenticator(driver string) (AuthenticatorInterface, error) {
 	case "jwt":
 		authenticator = &JwtAuthenticator{}
 	default:
-		return nil, fmt.Errorf("unknown driver: %s", driver)
+		authenticator = nil
+		err = fmt.Errorf("unknown driver: %s", driver)
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
-	return authenticator, nil
+	return authenticator, err
 }

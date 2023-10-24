@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm"
 	"net/http"
 	"os"
-	"time"
 )
 
 func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
@@ -30,13 +29,13 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		userEmail := c.GetHeader("userEmail")
-		userPassword := c.GetHeader("userPassword")
+		email := c.GetHeader("email")
+		password := c.GetHeader("password")
 
 		userRepository := repositories.NewRepository(databaseConnection)
-		user := userRepository.GetUserByEmail(userEmail)
+		user := userRepository.GetUserByEmail(email)
 
-		if user.Password != userPassword {
+		if user.Password != password {
 			c.JSON(http.StatusUnauthorized, map[string]string{
 				"error": "invalid credentials",
 			})
@@ -44,11 +43,11 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if user.TokenExpiration.After(time.Now()) {
-			c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": "token is still valid",
-			})
-		}
+		//if user.TokenExpiration.After(time.Now()) {
+		//	c.JSON(http.StatusInternalServerError, map[string]string{
+		//		"error": "token is still valid",
+		//	})
+		//}
 
 		// init token, sep function created
 		token, timestamp, err := middleware.CreateJWT()

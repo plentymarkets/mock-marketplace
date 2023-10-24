@@ -2,14 +2,14 @@ package database
 
 import "fmt"
 
-func CreateDatabase(driver, dsn string) (DatabaseInterface, error) {
-	var db DatabaseInterface
+func CreateDatabase(driver, dataSourceName string) (Database, error) {
+	var database Database
 	var err error
 
 	switch driver {
 	case "mariadb":
-		db = &MariaDBDatabase{}
-		err = db.NewDatabase(dsn)
+		database = &MariaDBDatabase{}
+		err = database.NewDatabase(dataSourceName)
 	case "mysql":
 		// instantiate MySQL and other databases similarly
 	default:
@@ -20,5 +20,5 @@ func CreateDatabase(driver, dsn string) (DatabaseInterface, error) {
 		return nil, err
 	}
 
-	return db, nil
+	return database, nil
 }

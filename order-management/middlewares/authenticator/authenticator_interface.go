@@ -2,7 +2,7 @@ package authenticator
 
 import "github.com/gin-gonic/gin"
 
-type AuthenticatorInterface interface {
-	NewAuthenticator(authenticatorServiceUrl string) AuthenticatorInterface
+type Authenticator interface {
+	NewAuthenticator(authenticatorServiceUrl string) Authenticator
 	Authenticate() gin.HandlerFunc
 }
