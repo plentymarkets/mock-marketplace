@@ -172,8 +172,8 @@ func (controller *OfferController) Delete() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, map[string]any{
-			"pageCount": "Offer with id " + id + " Has been deleted successfully",
-			"data":      offer,
+			"message": "Offer with id " + id + " Has been deleted successfully",
+			"data":    offer,
 		})
 		c.Done()
 	}
