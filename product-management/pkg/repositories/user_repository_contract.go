@@ -5,7 +5,7 @@ import (
 )
 
 type UserRepositoryContract interface {
-	FetchByID(id string) (models.User, error)
+	FetchByUser(user models.User) (models.User, error)
 	Create(user models.User) (models.User, error)
 	Update(user models.User) (models.User, error)
 }

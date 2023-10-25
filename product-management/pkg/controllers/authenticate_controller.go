@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"product-management/pkg/models"
 	"product-management/pkg/repositories"
 )
 
@@ -35,12 +36,13 @@ func (controller *AuthenticateController) Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		uuid := mdHashing(person.Username)
-
-		// Create request to auth
+		// TODO - Create request to auth
+		// token, err := http.Get("https://jsonplaceholder.typicode.com/posts/1")
 		token := "Update_token_with_one_retrieved_from_Auth"
 
-		user, err := controller.userRepository.FetchByID(uuid)
+		uuid := mdHashing(person.Username)
+		user := models.User{UUID: uuid}
+		user, err = controller.userRepository.FetchByUser(user)
 
 		if err != nil {
 			log.Printf(err.Error())

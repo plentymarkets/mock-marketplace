@@ -20,9 +20,9 @@ func NewUserRepository(gormDB *gorm.DB) (*UserRepository, error) {
 	return &repository, nil
 }
 
-func (repository *UserRepository) FetchByID(uuid string) (models.User, error) {
-	var user models.User
-	tx := repository.database.Model(&models.User{}).Find(&user, "uuid = ?", uuid)
+func (repository *UserRepository) FetchByUser(models.User) (models.User, error) {
+	var user = models.User{UUID: "098f6bcd4621d373cade4e832627b4f16"}
+	tx := repository.database.Where(&user).Find(&user)
 	return user, tx.Error
 }
 
