@@ -29,9 +29,16 @@ func (controller *AuthenticateController) Authenticate() gin.HandlerFunc {
 		var person = Person{}
 		err := c.BindJSON(&person)
 
+		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Bad Request"})
+			return
+		}
+
 		uuid := mdHashing(person.Username)
 
 		// Create request to auth
+		token := "Update_token_with_one_retrieved_from_Auth"
 
 		user, err := controller.userRepository.FetchByID(uuid)
 
@@ -42,7 +49,7 @@ func (controller *AuthenticateController) Authenticate() gin.HandlerFunc {
 		}
 
 		user.UUID = uuid
-		user.Token = "tokenFromApiUpdate"
+		user.Token = token
 
 		if user.ID == 0 {
 			user, err = controller.userRepository.Create(user)
