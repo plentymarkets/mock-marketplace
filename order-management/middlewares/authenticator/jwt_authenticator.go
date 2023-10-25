@@ -23,8 +23,8 @@ func (authenticator JwtAuthenticator) NewAuthenticator(authenticatorServiceUrl s
 	return authenticator
 }
 
-func (authenticator JwtAuthenticator) Authenticate() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (authenticator JwtAuthenticator) Authenticate() gin.HandlerFunc { // can we not do:and remove the above?
+	return func(c *gin.Context) { // func (authenticator JwtAuthenticator) Authenticate(authenticatorServiceUrl string) gin.HandlerFunc
 		userEmail := c.GetHeader("email")
 		userPassword := c.GetHeader("password")
 
@@ -54,7 +54,7 @@ func (authenticator JwtAuthenticator) Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		authentication, err := jwt.Parse(token.Token, func(t *jwt.Token) (interface{}, error) {
+		authentication, err := jwt.Parse(token.Token, func(t *jwt.Token) (interface{}, error) { // What is this code doing?
 			_, ok := t.Method.(*jwt.SigningMethodHMAC)
 
 			if !ok {

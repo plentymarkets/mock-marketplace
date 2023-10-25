@@ -21,8 +21,8 @@ func FetchToken(url string, email string, password string) (*Token, error) {
 	}
 
 	request.Header.Add("ApiKey", os.Getenv("API_KEY"))
-	request.Header.Add("email", email)
-	request.Header.Add("password", password)
+	request.Header.Add("email", email)       // Why do you put the user in a POST header?
+	request.Header.Add("password", password) // Why do you put the password in a POST header?
 
 	response, err := client.Do(request)
 	if err != nil {

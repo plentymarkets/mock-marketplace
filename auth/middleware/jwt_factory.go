@@ -8,11 +8,11 @@ import (
 )
 
 func CreateJWT() (string, time.Time, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	expiration := time.Now().Add(time.Hour)
-	claims["expiration"] = expiration.Unix()
-	tokenStr, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	token := jwt.New(jwt.SigningMethodHS256)                             // KISS
+	claims := token.Claims.(jwt.MapClaims)                               // ????
+	expiration := time.Now().Add(time.Hour)                              // ????
+	claims["expiration"] = expiration.Unix()                             // ????
+	tokenStr, err := token.SignedString([]byte(os.Getenv("JWT_SECRET"))) // ????
 
 	if err != nil {
 		log.Fatal(err)

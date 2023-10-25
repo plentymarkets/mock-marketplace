@@ -35,7 +35,7 @@ func (repository *UserRepository) DeleteUser(user models.User) {
 
 func (repository *UserRepository) GetUserByEmail(email string) models.User {
 	var user models.User
-	repository.database.Where("email = ?", email).First(&user)
+	repository.database.Where("email = ?", email).First(&user) // Error handling
 
 	return user
 }

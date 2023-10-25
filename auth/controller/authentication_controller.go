@@ -11,9 +11,9 @@ import (
 
 func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		apiKey := c.GetHeader("ApiKey")
+		apiKey := c.GetHeader("ApiKey") // What API key?
 
-		if apiKey == "" {
+		if apiKey == "" { // Combine the 2 ifs in 1 and return a more generic error
 			c.JSON(http.StatusUnauthorized, map[string]string{
 				"error": "missing api key",
 			})
@@ -21,7 +21,7 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if apiKey != os.Getenv("JWT_SECRET") {
+		if apiKey != os.Getenv("JWT_SECRET") { // What is the JWT_SECRET and what if i want 10 account
 			c.JSON(http.StatusUnauthorized, map[string]string{
 				"error": "invalid api key",
 			})
@@ -29,13 +29,13 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		email := c.GetHeader("email")
-		password := c.GetHeader("password")
+		email := c.GetHeader("email")       // And why are they in the header and not the body?
+		password := c.GetHeader("password") // Why is password plain text?
 
 		userRepository := repositories.NewRepository(databaseConnection)
-		user := userRepository.GetUserByEmail(email)
+		user := userRepository.GetUserByEmail(email) // Error handling
 
-		if user.Password != password {
+		if user.Password != password { // Why do we check here the credentials
 			c.JSON(http.StatusUnauthorized, map[string]string{
 				"error": "invalid credentials",
 			})
@@ -50,7 +50,7 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 		//}
 
 		// init token, sep function created
-		token, timestamp, err := middleware.CreateJWT()
+		token, timestamp, err := middleware.CreateJWT() // Why is this a middleware? What is a middleware?
 		// if error at func above
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{
