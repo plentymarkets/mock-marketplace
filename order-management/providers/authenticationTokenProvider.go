@@ -11,6 +11,8 @@ type Token struct {
 	Token string `json:"token"`
 }
 
+// FetchToken
+// TODO: Should email and password be sent via Header?
 func FetchToken(url string, email string, password string, authenticationApiKey string) (*Token, error) {
 	client := &http.Client{}
 

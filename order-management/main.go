@@ -28,7 +28,7 @@ func main() {
 
 	authenticatorService := authenticatorFactory.NewAuthenticator(routes.GetExternalRoutesConfig()["authenticationService"])
 
-	migrate.Migrate(databaseConnection)
-	seed.Seed(databaseConnection)
-	routes.RegisterRoutes(databaseConnection, authenticatorService)
+	migrate.Migrate(databaseConnection)                             // Mode it to a separate main.go in cmd/migrate
+	seed.Seed(databaseConnection)                                   // Mode it to a separate main.go in cmd/migrate
+	routes.RegisterRoutes(databaseConnection, authenticatorService) // Why is the middleware injected in the Routing system?
 }

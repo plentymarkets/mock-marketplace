@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+// Auth
+// TODO: This function uses the header instead of the body. Is this the best approach for handling sensitive data?
+// TODO: Errors are very specific. Are they TOO specific?
+// TODO: Passwords are not hashed. This sould be implemented in the future.
 func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authenticationApiKey := c.GetHeader("authenticationApiKey")
