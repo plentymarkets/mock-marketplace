@@ -24,7 +24,6 @@ func (controller *OrderController) UpdateOrderStatus() gin.HandlerFunc {
 
 func (controller *OrderController) GetOrders(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		//token := c.GetHeader("Authorization")
 		sellerId, err := strconv.Atoi(c.GetHeader("sellerId"))
 
 		if err != nil {
@@ -32,15 +31,15 @@ func (controller *OrderController) GetOrders(databaseConnection *gorm.DB) gin.Ha
 				"error": "Invalid seller id",
 			})
 		}
-		//
-		//if token == "" {
-		//	c.JSON(http.StatusUnauthorized, map[string]string{
-		//		"error": "Token is missing",
-		//	})
-		//}
 
-		orderRepository := repositories.NewRepository(databaseConnection)
-		orders := orderRepository.GetOrdersBySellerId(sellerId)
+		orderRepository := repositories.NewOrderRepository(databaseConnection)
+		orders, err := orderRepository.FindByField("seller_id", strconv.Itoa(sellerId), nil, nil)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Could not retrieve orders",
+			})
+		}
 
 		c.JSON(http.StatusOK, orders)
 	}

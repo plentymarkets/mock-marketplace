@@ -9,9 +9,12 @@ import (
 )
 
 func Seed(databaseConnection *gorm.DB) {
-	orderRepository := repositories.NewRepository(databaseConnection)
-	order := generateOrder()
-	orderRepository.DatabaseConnection.Create(&order)
+	orderRepository := repositories.NewOrderRepository(databaseConnection)
+	isEmpty := checkIfTableIsEmpty(orderRepository)
+	if isEmpty {
+		order := generateOrder()
+		orderRepository.DatabaseConnection.Create(&order)
+	}
 }
 
 func generateOrder() models.Order {
@@ -40,4 +43,10 @@ func generateOrder() models.Order {
 	}
 
 	return order
+}
+
+func checkIfTableIsEmpty(orderRepository repositories.OrderRepository) bool {
+	var orders []models.Order
+	orderRepository.DatabaseConnection.Find(&orders)
+	return len(orders) == 0
 }

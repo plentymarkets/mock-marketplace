@@ -7,13 +7,14 @@ import (
 	"gorm.io/gorm"
 	"net/http"
 	"os"
+	"time"
 )
 
 func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		apiKey := c.GetHeader("ApiKey")
+		authenticationApiKey := c.GetHeader("authenticationApiKey")
 
-		if apiKey == "" {
+		if authenticationApiKey == "" {
 			c.JSON(http.StatusUnauthorized, map[string]string{
 				"error": "missing api key",
 			})
@@ -21,7 +22,7 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if apiKey != os.Getenv("JWT_SECRET") {
+		if authenticationApiKey != os.Getenv("AUTHENTICATION_API_KEY") {
 			c.JSON(http.StatusUnauthorized, map[string]string{
 				"error": "invalid api key",
 			})
@@ -30,7 +31,24 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 		}
 
 		email := c.GetHeader("email")
+
+		if email == "" {
+			c.JSON(http.StatusUnauthorized, map[string]string{
+				"error": "missing email",
+			})
+			c.Abort()
+			return
+		}
+
 		password := c.GetHeader("password")
+
+		if password == "" {
+			c.JSON(http.StatusUnauthorized, map[string]string{
+				"error": "missing password",
+			})
+			c.Abort()
+			return
+		}
 
 		userRepository := repositories.NewRepository(databaseConnection)
 		user := userRepository.GetUserByEmail(email)
@@ -43,15 +61,17 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		//if user.TokenExpiration.After(time.Now()) {
-		//	c.JSON(http.StatusInternalServerError, map[string]string{
-		//		"error": "token is still valid",
-		//	})
-		//}
+		if time.Now().Unix() < user.TokenExpiration.Unix() && !user.TokenExpiration.IsZero() {
+			c.JSON(http.StatusOK, map[string]string{
+				"token": user.Token,
+			})
+			return
+		}
 
-		// init token, sep function created
+		timeNow := time.Now()
+		println(timeNow.String())
 		token, timestamp, err := middleware.CreateJWT()
-		// if error at func above
+
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": "could not generate token",
@@ -64,9 +84,10 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 		user.TokenExpiration = timestamp
 		userRepository.UpdateUser(user)
 
-		// if ok -> save to database
 		c.JSON(http.StatusOK, map[string]string{
 			"token": token,
 		})
+
+		return
 	}
 }

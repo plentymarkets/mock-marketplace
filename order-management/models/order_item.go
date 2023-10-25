@@ -5,7 +5,6 @@ import (
 )
 
 type OrderItem struct {
-	gorm.Model
 	ID       uint    `gorm:"primaryKey"`
 	OrderID  uint    `gorm:"type:int"`
 	OfferID  uint    `gorm:"type:int"`

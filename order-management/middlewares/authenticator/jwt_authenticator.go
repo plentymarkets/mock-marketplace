@@ -27,6 +27,7 @@ func (authenticator JwtAuthenticator) Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userEmail := c.GetHeader("email")
 		userPassword := c.GetHeader("password")
+		authenticationApiKey := c.GetHeader("authenticationApiKey")
 
 		if userEmail == "" {
 			c.JSON(http.StatusUnauthorized, map[string]string{
@@ -44,11 +45,11 @@ func (authenticator JwtAuthenticator) Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		token, err := providers.FetchToken(authenticator.AuthenticationServiceUrl, userEmail, userPassword)
+		token, err := providers.FetchToken(authenticator.AuthenticationServiceUrl, userEmail, userPassword, authenticationApiKey)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": "could not fetch token",
+				"error": err.Error(),
 			})
 			c.Abort()
 			return
@@ -65,7 +66,7 @@ func (authenticator JwtAuthenticator) Authenticate() gin.HandlerFunc {
 				return "", errors.New("something went wrong")
 			}
 
-			return []byte(os.Getenv("API_KEY")), nil
+			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 
 		if err != nil {

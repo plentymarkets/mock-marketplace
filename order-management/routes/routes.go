@@ -15,6 +15,7 @@ func RegisterRoutes(databaseConnection *gorm.DB, authenticator authenticator.Aut
 
 	routes := router.Group("/orders").Use(authenticator.Authenticate())
 	routes.POST("/get", orderController.GetOrders(databaseConnection))
+	//routes.POST("/update-status", orderController.UpdateOrderStatus(databaseConnection))
 
 	err := router.Run(os.Getenv("GIN_PORT"))
 

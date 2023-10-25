@@ -1,6 +1,9 @@
 package database
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 func CreateDatabase(driver, dataSourceName string) (Database, error) {
 	var database Database
@@ -10,15 +13,15 @@ func CreateDatabase(driver, dataSourceName string) (Database, error) {
 	case "mariadb":
 		database = &MariaDBDatabase{}
 		err = database.NewDatabase(dataSourceName)
-	case "mysql":
-		// instantiate MySQL and other databases similarly
 	default:
-		return nil, fmt.Errorf("unknown driver: %s", driver)
+		database = nil
+		err = fmt.Errorf("unknown driver: %s", driver)
 	}
 
-	if err != nil {
-		return nil, err
-	}
+	return database, err
+}
 
-	return database, nil
+func NewDsn(dbUser string, dbPassword string, dbHost string, dbPort string, dbName string, dbTimezone string) string {
+	dbTimezone = url.QueryEscape(dbTimezone)
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=%s", dbUser, dbPassword, dbHost, dbPort, dbName, dbTimezone)
 }

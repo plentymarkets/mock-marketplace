@@ -9,6 +9,12 @@ type OrderRepository struct {
 	DatabaseConnection *gorm.DB
 }
 
+func NewOrderRepository(databaseConnection *gorm.DB) OrderRepository {
+	repository := OrderRepository{}
+	repository.DatabaseConnection = databaseConnection
+	return repository
+}
+
 func (OrderRepository OrderRepository) FindAll(offset *int, limit *int) (*[]models.Order, error) {
 	OrderRepository.DatabaseConnection.Preload("OrderItems")
 
@@ -91,7 +97,7 @@ func (OrderRepository OrderRepository) FindOneByField(field string, value string
 
 func (OrderRepository OrderRepository) FindByField(field string, value string, offset *int, limit *int) (*[]models.Order, error) {
 	var orders []models.Order
-	OrderRepository.DatabaseConnection.Preload("OrderItems")
+	OrderRepository.DatabaseConnection = OrderRepository.DatabaseConnection.Preload("OrderItems")
 
 	if offset != nil {
 		OrderRepository.DatabaseConnection = OrderRepository.DatabaseConnection.Offset(*offset)
@@ -153,10 +159,4 @@ func (OrderRepository OrderRepository) FindByFields(fields map[string]string, of
 	}
 
 	return &orders, nil
-}
-
-func NewRepository(databaseConnection *gorm.DB) OrderRepository {
-	repository := OrderRepository{}
-	repository.DatabaseConnection = databaseConnection
-	return repository
 }

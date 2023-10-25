@@ -3,6 +3,7 @@ package repositories
 import (
 	"auth/models"
 	"gorm.io/gorm"
+	"log"
 )
 
 type UserRepository struct {
@@ -35,7 +36,12 @@ func (repository *UserRepository) DeleteUser(user models.User) {
 
 func (repository *UserRepository) GetUserByEmail(email string) models.User {
 	var user models.User
-	repository.database.Where("email = ?", email).First(&user)
+	tx := repository.database.Where("email = ?", email).First(&user)
+
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return models.User{}
+	}
 
 	return user
 }
