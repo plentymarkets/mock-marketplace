@@ -3,7 +3,6 @@ package providers
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -37,7 +36,7 @@ func FetchToken(url string, email string, password string, authenticationApiKey 
 		}
 	}(response.Body)
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}

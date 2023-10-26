@@ -16,9 +16,79 @@ func (controller *OrderController) CreateOrder() gin.HandlerFunc {
 	}
 }
 
-func (controller *OrderController) UpdateOrderStatus() gin.HandlerFunc {
+func (controller *OrderController) UpdateOrderStatus(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Update order status
+		sellerId, err := strconv.Atoi(c.GetHeader("sellerId"))
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid seller id",
+			})
+			c.Abort()
+			return
+		}
+
+		orderId, err := strconv.Atoi(c.GetHeader("orderId"))
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid order id",
+			})
+			c.Abort()
+			return
+		}
+
+		status := c.GetHeader("status")
+
+		if status == "" {
+			c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid new status",
+			})
+			c.Abort()
+			return
+		}
+
+		orderRepository := repositories.NewOrderRepository(databaseConnection)
+
+		fields := map[string]string{
+			"seller_id": strconv.Itoa(sellerId),
+			"id":        strconv.Itoa(orderId),
+		}
+
+		order, err := orderRepository.FindOneByFields(fields)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Could not retrieve order",
+			})
+			c.Abort()
+			return
+		}
+
+		if order == nil {
+			c.JSON(http.StatusNotFound, map[string]string{
+				"error": "Order not found",
+			})
+			c.Abort()
+			return
+		}
+
+		order.Status = status
+		transaction := orderRepository.DatabaseConnection.Save(&order)
+
+		if transaction.Error != nil {
+			c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Could not update order",
+			})
+			c.Abort()
+			return
+		}
+
+		c.JSON(http.StatusOK, map[string]string{
+			"message": "Order updated successfully",
+		})
+
+		c.Done()
 	}
 }
 
@@ -30,6 +100,8 @@ func (controller *OrderController) GetOrders(databaseConnection *gorm.DB) gin.Ha
 			c.JSON(http.StatusBadRequest, map[string]string{
 				"error": "Invalid seller id",
 			})
+			c.Abort()
+			return
 		}
 
 		orderRepository := repositories.NewOrderRepository(databaseConnection)
@@ -39,9 +111,12 @@ func (controller *OrderController) GetOrders(databaseConnection *gorm.DB) gin.Ha
 			c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": "Could not retrieve orders",
 			})
+			c.Abort()
+			return
 		}
 
 		c.JSON(http.StatusOK, orders)
+		c.Done()
 	}
 }
 

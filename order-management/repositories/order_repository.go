@@ -95,6 +95,27 @@ func (OrderRepository OrderRepository) FindOneByField(field string, value string
 	return &order, nil
 }
 
+func (OrderRepository OrderRepository) FindOneByFields(fields map[string]string) (*models.Order, error) {
+	var order models.Order
+	OrderRepository.DatabaseConnection = OrderRepository.DatabaseConnection.Preload("OrderItems")
+
+	for key, val := range fields {
+		OrderRepository.DatabaseConnection = OrderRepository.DatabaseConnection.Where(key+" = ?", val)
+
+		if OrderRepository.DatabaseConnection.Error != nil {
+			return nil, OrderRepository.DatabaseConnection.Error
+		}
+	}
+
+	OrderRepository.DatabaseConnection.First(&order)
+
+	if OrderRepository.DatabaseConnection.Error != nil {
+		return nil, OrderRepository.DatabaseConnection.Error
+	}
+
+	return &order, nil
+}
+
 func (OrderRepository OrderRepository) FindByField(field string, value string, offset *int, limit *int) (*[]models.Order, error) {
 	var orders []models.Order
 	OrderRepository.DatabaseConnection = OrderRepository.DatabaseConnection.Preload("OrderItems")

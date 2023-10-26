@@ -2,6 +2,7 @@ package controller
 
 import (
 	"auth/middleware"
+	"auth/models"
 	"auth/repositories"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -65,7 +66,7 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if time.Now().Unix() < user.TokenExpiration.Unix() && !user.TokenExpiration.IsZero() {
+		if tokenIsntExpired(user) {
 			c.JSON(http.StatusOK, map[string]string{
 				"token": user.Token,
 			})
@@ -92,6 +93,10 @@ func Auth(databaseConnection *gorm.DB) gin.HandlerFunc {
 			"token": token,
 		})
 
-		return
+		c.Done()
 	}
+}
+
+func tokenIsntExpired(user models.User) bool {
+	return time.Now().Unix() < user.TokenExpiration.Unix() && !user.TokenExpiration.IsZero()
 }
