@@ -21,12 +21,6 @@ func NewUserRepository(gormDB *gorm.DB) (*UserRepository, error) {
 	return &repository, nil
 }
 
-func (repository *UserRepository) FetchByID(id string) (models.User, error) {
-	var user models.User
-	tx := repository.database.First(&user, id)
-	return user, tx.Error
-}
-
 func (repository *UserRepository) FetchAll(page int, usersPerPage int) ([]models.User, int, error) {
 
 	var users []models.User
@@ -48,6 +42,18 @@ func (repository *UserRepository) FetchAll(page int, usersPerPage int) ([]models
 	}
 
 	return users, pageCount, nil
+}
+
+func (repository *UserRepository) FetchByID(id string) (models.User, error) {
+	var user models.User
+	tx := repository.database.First(&user, id)
+	return user, tx.Error
+}
+
+func (repository *UserRepository) FetchByName(username string) (models.User, error) {
+	var user models.User
+	tx := repository.database.First(&user, username)
+	return user, tx.Error
 }
 
 func (repository *UserRepository) Create(user models.User) (models.User, error) {

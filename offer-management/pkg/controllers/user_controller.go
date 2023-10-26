@@ -8,7 +8,6 @@ import (
 	"offer-management/pkg/models"
 	"offer-management/pkg/repositories"
 	"strconv"
-	"time"
 )
 
 const UsersPerPage = 10
@@ -89,6 +88,38 @@ func (controller *UserController) GetByID() gin.HandlerFunc {
 	}
 }
 
+func (controller *UserController) GetByName() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		username := c.Param("user_name")
+		_, err := strconv.Atoi(username)
+
+		if err != nil {
+			log.Printf("User not found: %s", err.Error())
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "User not found"})
+			return
+		}
+
+		user, err := controller.userRepository.FetchByName(username)
+
+		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+			return
+		}
+
+		if user.ID == 0 {
+			c.JSON(http.StatusOK, map[string]any{
+				"data": nil,
+			})
+		} else {
+			c.JSON(http.StatusOK, map[string]any{
+				"data": user,
+			})
+		}
+		c.Done()
+	}
+}
+
 func (controller *UserController) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -117,7 +148,7 @@ func (controller *UserController) Create() gin.HandlerFunc {
 	}
 }
 
-func (controller *UserController) Update() gin.HandlerFunc { // todo - investigate changes on the variant when changing the user.
+func (controller *UserController) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user = models.User{}
 		err := c.BindJSON(&user)
@@ -135,8 +166,6 @@ func (controller *UserController) Update() gin.HandlerFunc { // todo - investiga
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
 			return
 		}
-
-		time.Sleep(100)
 
 		c.JSON(http.StatusOK, map[string]any{
 			"message": "User updated successfully",
@@ -171,5 +200,52 @@ func (controller *UserController) Delete() gin.HandlerFunc {
 			"data":    user,
 		})
 		c.Done()
+	}
+}
+
+func (controller *UserController) Login() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.PostForm("id")
+		_, err := strconv.Atoi(id)
+
+		if err = c.ShouldBind(&id); err != nil {
+			log.Printf("Invalid request: %s", err.Error())
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Request: Check your input data"})
+			return
+		}
+
+		fetchedUser, err := controller.userRepository.FetchByID(id)
+
+		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+			return
+		}
+
+		if fetchedUser.ID == 0 {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "User not found"})
+			return
+		}
+
+		providedName := c.PostForm("user_name")
+		storedName := fetchedUser.UserName
+
+		if providedName != storedName {
+			log.Println("Invalid credentials")
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
+			return
+		}
+
+		providedPassword := c.PostForm("user_password")
+		storedPassword := fetchedUser.UserPassword
+
+		if providedPassword != storedPassword {
+			log.Println("Invalid credentials")
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
+			return
+		}
+
+		token := "JWT-SECRET"
+		c.JSON(http.StatusOK, gin.H{"token": token})
 	}
 }
