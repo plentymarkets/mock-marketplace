@@ -1,0 +1,35 @@
+-- CREATE TABLE orders
+-- (
+--     id               INT PRIMARY KEY,
+--     customer_id      INT,
+--     order_number     VARCHAR(255),
+--     order_date       DATETIME,
+--     status           VARCHAR(50),
+--     total_sum        DECIMAL(10, 2),
+--     billing_address  VARCHAR(255),
+--     shipping_address VARCHAR(255)
+-- );
+--
+-- CREATE TABLE order_items
+-- (
+--     id       INT PRIMARY KEY,
+--     order_id INT,
+--     offer_id INT,
+--     gtin     VARCHAR(50),
+--     price    DECIMAL(10, 2),
+--     quantity INT,
+--     sku      VARCHAR(50),
+--     FOREIGN KEY (order_id) REFERENCES orders (id)
+-- );
+--
+-- INSERT INTO orders(id, customer_id, order_number, order_date, status, total_sum, billing_address, shipping_address)
+-- VALUES (1, 1001, 'ORDER123', '2023-10-05 15:45:30', 'Processing', 99.99, '123 Billing St, City, Country',
+--         '456 Shipping St, City, Country'),
+--        (2, 1002, 'ORDER456', '2023-10-06 12:30:45', 'Shipped', 59.99, '789 Billing St, City, Country',
+--         '101 Shipping St, City, Country');
+--
+-- INSERT INTO order_items(id, order_id, offer_id, gtin, price, quantity, sku)
+-- VALUES (1, 1, 201, 'GTIN123', 49.99, 2, 'SKU123'),
+--        (2, 1, 202, 'GTIN456', 25.00, 1, 'SKU456'),
+--        (3, 2, 203, 'GTIN789', 19.99, 3, 'SKU789'),
+--        (4, 2, 204, 'GTIN101', 20.00, 2, 'SKU101');
