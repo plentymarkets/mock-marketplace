@@ -38,8 +38,8 @@ func (controller *OfferController) GetAll() gin.HandlerFunc {
 
 		sku := c.DefaultQuery("sku", "")
 		if sku != "" {
-			var product = models.Product{SKU: sku}
 
+			var product = models.Product{SKU: sku}
 			product, err := controller.productRepository.FetchByProduct(product)
 
 			if err != nil {
@@ -116,6 +116,7 @@ func (controller *OfferController) GetByID() gin.HandlerFunc {
 	}
 }
 
+// TODO - Mode to Models
 type Request struct {
 	ProductGTIN string       `json:"product_gtin" binding:"required"`
 	ProductSKU  string       `json:"product_sku"`
@@ -123,7 +124,7 @@ type Request struct {
 }
 
 type Response struct {
-	Data    models.Product `json:"data" binding:"required"`
+	Product models.Product `json:"data" binding:"required"`
 	Message string         `json:"message" binding:"required"`
 }
 
@@ -159,11 +160,13 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 			body, _ := io.ReadAll(response.Body)
 			err = json.Unmarshal(body, &jsonMap)
 
-			if err != nil || jsonMap.Data.GTIN == "" {
+			c.JSON(http.StatusOK, jsonMap)
+			if err != nil || jsonMap.Product.GTIN == "" {
 				c.JSON(http.StatusOK, gin.H{"message": "Product does not Exists!"})
 				return
 			}
 
+			product = jsonMap.Product
 			product.Offers = append(product.Offers, offer)
 			product, err = controller.productRepository.Create(product)
 
