@@ -23,7 +23,7 @@ func NewOfferRepository(gormDB *gorm.DB) (*OfferRepository, error) {
 
 func (repository *OfferRepository) FetchByID(id string) (models.Offer, error) {
 	var offer models.Offer
-	tx := repository.database.First(&offer, id)
+	tx := repository.database.Find(&offer, id)
 	return offer, tx.Error
 }
 
