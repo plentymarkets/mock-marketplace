@@ -1,14 +1,26 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"github.com/gin-gonic/gin"
+	"log"
+	"product-management/pkg/database"
+	"product-management/pkg/router"
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, World!")
-	})
+	engine := gin.Default()
 
-	http.ListenAndServe(":3004", nil)
+	dsn := database.GetMariaDBDSN()
+	con := database.CreateConnection(dsn)
+
+	router.Auth(con, engine)
+	router.Product(con, engine)
+	router.Variant(con, engine)
+
+	err := engine.Run(":3004")
+
+	if err != nil {
+		log.Fatal(err.Error())
+		return
+	}
 }
