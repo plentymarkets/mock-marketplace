@@ -59,16 +59,8 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 
 func (controller *ProductController) GetByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id := c.Param("id")
-		_, err := strconv.Atoi(id)
-
-		if err != nil {
-			log.Printf("Invalid product ID %s", err.Error())
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Invalid Request: ProductID should be an integer value"})
-			return
-		}
-
-		product, err := controller.productRepository.FetchByID(id)
+		gtin := c.Param("gtin")
+		product, err := controller.productRepository.FetchByProduct(models.Product{GTIN: gtin})
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -148,12 +140,12 @@ func (controller *ProductController) Update() gin.HandlerFunc { // todo - invest
 
 func (controller *ProductController) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id := c.Param("id")
+		gtin := c.Param("gtin")
+		product, err := controller.productRepository.FetchByProduct(models.Product{GTIN: gtin})
 
-		product, err := controller.productRepository.FetchByID(id)
-		if err != nil {
+		if err != nil || product.ID == 0 {
 			log.Printf(err.Error())
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Product not found!"})
 			return
 		}
 
@@ -167,9 +159,11 @@ func (controller *ProductController) Delete() gin.HandlerFunc {
 			return
 		}
 
+		message, _ := fmt.Printf("Product with id %s Has been deleted successfully", gtin)
+
 		c.JSON(http.StatusOK, map[string]any{
-			"pageCount": "Product with id " + id + " Has been deleted successfully",
-			"data":      product,
+			"message": message,
+			"data":    product,
 		})
 		c.Done()
 	}
