@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
 	"offer-management/pkg/database"
 	"offer-management/pkg/router"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -14,6 +15,7 @@ func main() {
 	con := database.CreateConnection(dsn)
 
 	router.Offer(con, engine)
+	router.User(con, engine)
 
 	err := engine.Run(":3002")
 

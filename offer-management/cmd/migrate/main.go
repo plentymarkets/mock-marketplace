@@ -15,4 +15,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	err = db.AutoMigrate(&models.User{})
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
