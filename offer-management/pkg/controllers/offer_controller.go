@@ -1,10 +1,13 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"io"
 	"log"
 	"net/http"
+	"offer-management/pkg/client"
 	"offer-management/pkg/models"
 	"offer-management/pkg/repositories"
 	"strconv"
@@ -17,6 +20,7 @@ type Person struct {
 	ID string `uri:"id" binding:"required,uuid"`
 }
 
+// TODO - Move this after testing!
 type OfferController struct {
 	offerRepository   repositories.OfferRepositoryContract
 	productRepository repositories.ProductRepositoryContract
@@ -34,8 +38,8 @@ func (controller *OfferController) GetAll() gin.HandlerFunc {
 
 		sku := c.DefaultQuery("sku", "")
 		if sku != "" {
-			var product = models.Product{SKU: sku}
 
+			var product = models.Product{SKU: sku}
 			product, err := controller.productRepository.FetchByProduct(product)
 
 			if err != nil {
@@ -112,9 +116,16 @@ func (controller *OfferController) GetByID() gin.HandlerFunc {
 	}
 }
 
+// TODO - Mode to Models
 type Request struct {
-	ProductSKU string       `json:"product_sku" binding:"required"`
-	Offer      models.Offer `json:"offer" binding:"required"`
+	ProductGTIN string       `json:"product_gtin" binding:"required"`
+	ProductSKU  string       `json:"product_sku"`
+	Offer       models.Offer `json:"offer" binding:"required"`
+}
+
+type Response struct {
+	Product models.Product `json:"data" binding:"required"`
+	Message string         `json:"message" binding:"required"`
 }
 
 func (controller *OfferController) Create() gin.HandlerFunc {
@@ -129,17 +140,42 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 			return
 		}
 
-		var product = models.Product{SKU: request.ProductSKU}
+		var product = models.Product{GTIN: request.ProductGTIN}
 		product, err = controller.productRepository.FetchByProduct(product)
 
-		var offer = models.Offer{}
+		var offer = request.Offer
+		offer.ID = 0
+
 		if product.ID == 0 {
-			c.JSON(http.StatusOK, gin.H{"message": "Fail Not implemented!"})
+
+			requestURL := fmt.Sprintf("http://localhost:3004/api/product/%s", request.ProductGTIN)
+			response, err := client.GET(requestURL)
+
+			if err != nil || response.StatusCode != http.StatusOK {
+				c.JSON(http.StatusOK, gin.H{"message": "Fail"})
+				return
+			}
+
+			var jsonMap Response
+			body, _ := io.ReadAll(response.Body)
+			err = json.Unmarshal(body, &jsonMap)
+
+			if err != nil || jsonMap.Product.GTIN == "" {
+				c.JSON(http.StatusOK, gin.H{"message": "Product does not Exists!"})
+				return
+			}
+
+			product = jsonMap.Product
+			product.Offers = append(product.Offers, offer)
+			product, err = controller.productRepository.Create(product)
+
+			c.JSON(http.StatusOK, gin.H{
+				"message": "Success",
+				"data":    product,
+			})
 			return
-			// TODO - Request product to ProductManagement
-		} else {
-			offer = request.Offer
 		}
+
 		offer.ProductID = product.ID
 		offer, err = controller.offerRepository.Create(offer)
 
@@ -149,7 +185,7 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, map[string]any{
+		c.JSON(http.StatusOK, gin.H{
 			"message": "Success",
 			"data":    offer,
 		})

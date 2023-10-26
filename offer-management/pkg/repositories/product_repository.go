@@ -22,8 +22,9 @@ func NewProductRepository(gormDB *gorm.DB) (*ProductRepository, error) {
 }
 
 func (repository *ProductRepository) FetchByProduct(product models.Product) (models.Product, error) {
-	tx := repository.database.Where(&product).Preload("Offers").Find(&product)
-	return product, tx.Error
+	var dbProduct = models.Product{}
+	tx := repository.database.Where(&product).Preload("Offers").Find(&dbProduct)
+	return dbProduct, tx.Error
 }
 
 func (repository *ProductRepository) FetchAll(page int, productsPerPage int) ([]models.Product, int, error) {
