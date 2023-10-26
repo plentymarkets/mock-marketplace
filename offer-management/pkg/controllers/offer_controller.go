@@ -148,7 +148,7 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 
 		if product.ID == 0 {
 
-			requestURL := fmt.Sprintf("http://localhost:3004/api/product/%s", "1")
+			requestURL := fmt.Sprintf("http://localhost:3004/api/product/%s", request.ProductGTIN)
 			response, err := client.GET(requestURL)
 
 			if err != nil || response.StatusCode != http.StatusOK {
@@ -160,7 +160,6 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 			body, _ := io.ReadAll(response.Body)
 			err = json.Unmarshal(body, &jsonMap)
 
-			c.JSON(http.StatusOK, jsonMap)
 			if err != nil || jsonMap.Product.GTIN == "" {
 				c.JSON(http.StatusOK, gin.H{"message": "Product does not Exists!"})
 				return
@@ -170,7 +169,10 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 			product.Offers = append(product.Offers, offer)
 			product, err = controller.productRepository.Create(product)
 
-			c.JSON(http.StatusOK, product)
+			c.JSON(http.StatusOK, gin.H{
+				"message": "Success",
+				"data":    product,
+			})
 			return
 		}
 
@@ -183,7 +185,7 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, map[string]any{
+		c.JSON(http.StatusOK, gin.H{
 			"message": "Success",
 			"data":    offer,
 		})
