@@ -18,17 +18,36 @@ type Person struct {
 }
 
 type OfferController struct {
-	offerRepository repositories.OfferRepositoryContract
+	offerRepository   repositories.OfferRepositoryContract
+	productRepository repositories.ProductRepositoryContract
 }
 
-func NewOfferController(offerRepository repositories.OfferRepositoryContract) OfferController {
+func NewOfferController(offerRepository repositories.OfferRepositoryContract, productRepository repositories.ProductRepositoryContract) OfferController {
 	return OfferController{
-		offerRepository: offerRepository,
+		offerRepository:   offerRepository,
+		productRepository: productRepository,
 	}
 }
 
 func (controller *OfferController) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		sku := c.DefaultQuery("sku", "")
+		if sku != "" {
+			var product = models.Product{SKU: sku}
+
+			product, err := controller.productRepository.FetchByProduct(product)
+
+			if err != nil {
+				log.Printf(err.Error())
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"data": product})
+			c.Done()
+			return
+		}
 
 		pageStr := c.DefaultQuery("page", "1")
 		page, err := strconv.Atoi(pageStr)
@@ -53,7 +72,7 @@ func (controller *OfferController) GetAll() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, map[string]any{
+		c.JSON(http.StatusOK, gin.H{
 			"data":      offers,
 			"pageCount": pageCount,
 		})
@@ -93,11 +112,16 @@ func (controller *OfferController) GetByID() gin.HandlerFunc {
 	}
 }
 
+type Request struct {
+	ProductSKU string       `json:"product_sku" binding:"required"`
+	Offer      models.Offer `json:"offer" binding:"required"`
+}
+
 func (controller *OfferController) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		var offer = models.Offer{}
-		err := c.BindJSON(&offer)
+		var request = Request{}
+		err := c.BindJSON(&request)
 
 		if err != nil {
 			log.Println(err.Error())
@@ -105,6 +129,18 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 			return
 		}
 
+		var product = models.Product{SKU: request.ProductSKU}
+		product, err = controller.productRepository.FetchByProduct(product)
+
+		var offer = models.Offer{}
+		if product.ID == 0 {
+			c.JSON(http.StatusOK, gin.H{"message": "Fail Not implemented!"})
+			return
+			// TODO - Request product to ProductManagement
+		} else {
+			offer = request.Offer
+		}
+		offer.ProductID = product.ID
 		offer, err = controller.offerRepository.Create(offer)
 
 		if err != nil {
@@ -172,8 +208,8 @@ func (controller *OfferController) Delete() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, map[string]any{
-			"pageCount": "Offer with id " + id + " Has been deleted successfully",
-			"data":      offer,
+			"message": "Offer with id " + id + " Has been deleted successfully",
+			"data":    offer,
 		})
 		c.Done()
 	}

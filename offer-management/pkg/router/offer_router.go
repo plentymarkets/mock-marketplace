@@ -12,7 +12,8 @@ func Offer(mariadb *gorm.DB, engine *gin.Engine) {
 
 	// Homework = Check what the Engin
 	offerRepository, _ := repositories.NewOfferRepository(mariadb)
-	offerController := controllers.NewOfferController(offerRepository)
+	productRepository, _ := repositories.NewProductRepository(mariadb)
+	offerController := controllers.NewOfferController(offerRepository, productRepository)
 
 	offer := engine.Group("/api/offer").Use(middlewares.Authenticate())
 

@@ -13,10 +13,6 @@ import (
 
 const ProductsPerPage = 10
 
-type Person struct {
-	ID string `uri:"id" binding:"required,uuid"`
-}
-
 type ProductController struct {
 	productRepository repositories.ProductRepositoryContract
 }

@@ -20,4 +20,9 @@ func main() {
 	if err2 != nil {
 		log.Fatal(err2.Error())
 	}
+
+	err3 := db.AutoMigrate(&models.User{})
+	if err3 != nil {
+		log.Fatal(err3.Error())
+	}
 }
