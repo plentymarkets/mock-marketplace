@@ -8,7 +8,6 @@ import (
 	"product-management/pkg/models"
 	"product-management/pkg/repositories"
 	"strconv"
-	"time"
 )
 
 const ProductsPerPage = 10
@@ -128,8 +127,6 @@ func (controller *ProductController) Update() gin.HandlerFunc { // todo - invest
 			return
 		}
 
-		time.Sleep(100)
-
 		c.JSON(http.StatusOK, map[string]any{
 			"message": "Product updated successfully",
 			"data":    product,
@@ -143,16 +140,21 @@ func (controller *ProductController) Delete() gin.HandlerFunc {
 		gtin := c.Param("gtin")
 		product, err := controller.productRepository.FetchByProduct(models.Product{GTIN: gtin})
 
-		if err != nil || product.ID == 0 {
-			log.Printf(err.Error())
+		if product.ID == 0 {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Product not found!"})
+			return
+		}
+
+		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
 			return
 		}
 
 		product.Deleted = true
 
-		time.Sleep(100)
 		product, err = controller.productRepository.Update(product)
+
 		if err != nil {
 			log.Printf(err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
