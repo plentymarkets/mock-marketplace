@@ -36,15 +36,20 @@ func NewOfferController(offerRepository repositories.OfferRepositoryContract, pr
 func (controller *OfferController) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		sku := c.DefaultQuery("sku", "")
-		if sku != "" {
+		gtin := c.DefaultQuery("gtin", "")
+		if gtin != "" {
 
-			var product = models.Product{SKU: sku}
+			var product = models.Product{GTIN: gtin}
 			product, err := controller.productRepository.FetchByProduct(product)
 
 			if err != nil {
 				log.Printf(err.Error())
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+				return
+			}
+
+			if product.ID == 0 {
+				c.JSON(http.StatusOK, gin.H{"data": nil})
 				return
 			}
 
@@ -152,7 +157,7 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 			response, err := client.GET(requestURL)
 
 			if err != nil || response.StatusCode != http.StatusOK {
-				c.JSON(http.StatusOK, gin.H{"message": "Fail"})
+				c.JSON(http.StatusOK, gin.H{"message": "Fail: Product not found"})
 				return
 			}
 
@@ -195,6 +200,7 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 
 func (controller *OfferController) Update() gin.HandlerFunc { // todo - investigate changes on the variant when changing the offer.
 	return func(c *gin.Context) {
+
 		var offer = models.Offer{}
 		err := c.BindJSON(&offer)
 
