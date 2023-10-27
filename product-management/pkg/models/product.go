@@ -6,8 +6,6 @@ type Product struct {
 	Name          string    `gorm:"<-" json:"name" binding:"required"`
 	Description   string    `gorm:"<-" json:"description" binding:"required"`
 	GTIN          string    `gorm:"<-" json:"gtin,omitempty"`
-	Price         float32   `gorm:"<-" json:"price,omitempty"`
-	Currency      string    `gorm:"<-" json:"currency,omitempty"`
 	Categories    int       `gorm:"<-" json:"categories" binding:"required"`
 	Manufacturers int       `gorm:"<-" json:"manufacturers" binding:"required"`
 	Attributes    string    `gorm:"<-" json:"attributes" binding:"required"`

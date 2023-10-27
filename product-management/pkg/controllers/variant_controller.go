@@ -140,6 +140,11 @@ func (controller *VariantController) Delete() gin.HandlerFunc {
 		id := c.Param("id")
 		variant, err := controller.variantRepository.FetchById(id)
 
+		if variant.ID == 0 {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Variant not found"})
+			return
+		}
+
 		if err != nil {
 			log.Printf(err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
