@@ -41,6 +41,7 @@ func (controller *AuthenticateController) Authenticate() gin.HandlerFunc {
 		token := "Update_token_with_one_retrieved_from_Auth"
 
 		uuid := mdHashing(person.Username)
+
 		user := models.User{UUID: uuid}
 		user, err = controller.userRepository.FetchByUser(user)
 
