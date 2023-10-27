@@ -50,9 +50,9 @@ func (repository *UserRepository) FetchByID(id string) (models.User, error) {
 	return user, tx.Error
 }
 
-func (repository *UserRepository) FetchByName(username string) (models.User, error) {
+func (repository *UserRepository) FetchByName(UserName string) (models.User, error) {
 	var user models.User
-	tx := repository.database.First(&user, username)
+	tx := repository.database.Where("user_name = ?", UserName).First(&user)
 	return user, tx.Error
 }
 
