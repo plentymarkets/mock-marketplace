@@ -207,13 +207,17 @@ func (controller *UserController) Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		providedName := c.PostForm("user_name")
 
-		// # This "check if correct" is not working #
-		//if err := c.BindJSON(&providedName); err != nil {
-		//	log.Printf("Invalid request: %s", err.Error())
-		//	log.Println("providedName: " + providedName)
-		//	c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Request: Check your input data"})
-		//	return
-		//}
+		if providedName == "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Missing input"})
+			return
+		}
+
+		providedPassword := c.PostForm("user_password")
+
+		if providedPassword == "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Missing input"})
+			return
+		}
 
 		fetchedUser, err := controller.userRepository.FetchByName(providedName)
 
@@ -224,27 +228,20 @@ func (controller *UserController) Login() gin.HandlerFunc {
 		}
 
 		if fetchedUser.ID == 0 {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "User not found"})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
 			return
 		}
 
 		storedName := fetchedUser.UserName
 
 		if providedName != storedName {
-			log.Println("Invalid credentials")
-			log.Println("providedName: " + providedName)
-			log.Println("storedName: " + storedName)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
 			return
 		}
 
-		providedPassword := c.PostForm("user_password")
 		storedPassword := fetchedUser.UserPassword
 
 		if providedPassword != storedPassword {
-			log.Println("Invalid credentials")
-			log.Println("providedPassword: " + providedPassword)
-			log.Println("storedPassword: " + storedPassword)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
 			return
 		}

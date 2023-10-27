@@ -52,7 +52,7 @@ func (repository *UserRepository) FetchByID(id string) (models.User, error) {
 
 func (repository *UserRepository) FetchByName(UserName string) (models.User, error) {
 	var user models.User
-	tx := repository.database.Where("user_name = ?", UserName).First(&user)
+	tx := repository.database.Where("user_name = ?", UserName).Find(&user)
 	return user, tx.Error
 }
 
