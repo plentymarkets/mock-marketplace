@@ -2,24 +2,29 @@ package database
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 )
 
-func CreateDatabase(driver, dataSourceName string) (Database, error) {
+func CreateDatabase(driver string) Database {
 	var database Database
 	var err error
 
 	switch driver {
 	case "mariadb":
 		database = &MariaDBDatabase{}
-		dataSourceName = GetMariaDBDSN()
+		dataSourceName := GetMariaDBDSN()
 		err = database.SetupDatabase(dataSourceName)
 	default:
 		database = nil
 		err = fmt.Errorf("unknown driver: %s", driver)
 	}
 
-	return database, err
+	if err != nil {
+		log.Fatal("Could not create database")
+	}
+
+	return database
 }
 
 func NewDsn(dbUser string, dbPassword string, dbHost string, dbPort string, dbName string, dbTimezone string) string {
