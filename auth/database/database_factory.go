@@ -12,6 +12,7 @@ func CreateDatabase(driver, dataSourceName string) (Database, error) {
 	switch driver {
 	case "mariadb":
 		database = &MariaDBDatabase{}
+		dataSourceName = GetMariaDBDSN()
 		err = database.NewDatabase(dataSourceName)
 	default:
 		database = nil
