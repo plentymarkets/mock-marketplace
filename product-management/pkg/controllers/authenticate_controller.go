@@ -47,7 +47,7 @@ func (controller *AuthenticateController) Authenticate() gin.HandlerFunc {
 
 		if err != nil {
 			log.Printf(err.Error())
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
 			return
 		}
 

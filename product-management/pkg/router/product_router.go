@@ -14,12 +14,11 @@ func Product(mariadb *gorm.DB, engine *gin.Engine) {
 	productRepository, _ := repositories.NewProductRepository(mariadb)
 	productController := controllers.NewProductController(productRepository)
 
-	product := engine.Group("/api/product").Use(middlewares.Authenticate())
+	product := engine.Group("/product").Use(middlewares.Authenticate())
 
 	product.GET("/", productController.GetAll())
-	product.GET("/:gtin", productController.GetByID())
+	product.GET("/:gtin", productController.GetByGTIN())
 	product.POST("/", productController.Create())
-	product.PUT("/", productController.Update())
+	product.PUT("/:gtin", productController.Update())
 	product.DELETE("/:gtin", productController.Delete())
-	//product.GET("/test", productController.GetProducts2)
 }

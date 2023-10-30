@@ -13,11 +13,11 @@ func Variant(mariadb *gorm.DB, engine *gin.Engine) {
 	variantRepository, _ := repositories.NewVariantRepository(mariadb)
 	variantController := controllers.NewVariantController(&variantRepository)
 
-	variant := engine.Group("/api/variant").Use(middlewares.Authenticate())
+	variant := engine.Group("/variant").Use(middlewares.Authenticate())
 
 	variant.GET("/", variantController.GetAll())
 	variant.GET("/:id", variantController.GetByID())
 	variant.POST("/", variantController.Create())
-	variant.PUT("/", variantController.Update())
+	variant.PUT("/:id", variantController.Update())
 	variant.DELETE("/:id", variantController.Delete())
 }

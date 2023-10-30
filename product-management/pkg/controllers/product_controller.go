@@ -48,7 +48,7 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, map[string]any{
+		c.JSON(http.StatusOK, gin.H{
 			"data":      products,
 			"pageCount": pageCount,
 		})
@@ -56,7 +56,7 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 	}
 }
 
-func (controller *ProductController) GetByID() gin.HandlerFunc {
+func (controller *ProductController) GetByGTIN() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		gtin := c.Param("gtin")
 		product, err := controller.productRepository.FetchByProduct(models.Product{GTIN: gtin})
@@ -68,19 +68,15 @@ func (controller *ProductController) GetByID() gin.HandlerFunc {
 		}
 
 		if product.ID == 0 {
-			c.JSON(http.StatusOK, map[string]any{
-				"data": nil,
-			})
+			c.JSON(http.StatusNotFound, nil)
 		} else {
-			c.JSON(http.StatusOK, map[string]any{
-				"data": product,
-			})
+			c.JSON(http.StatusOK, product)
 		}
 		c.Done()
 	}
 }
 
-func (controller *ProductController) Create() gin.HandlerFunc { // todo - If the VariantID is provided, it can change data in Variants !!!
+func (controller *ProductController) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var product = models.Product{}
@@ -88,7 +84,7 @@ func (controller *ProductController) Create() gin.HandlerFunc { // todo - If the
 
 		if err != nil {
 			log.Println(err.Error())
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
 			return
 		}
 
@@ -100,22 +96,19 @@ func (controller *ProductController) Create() gin.HandlerFunc { // todo - If the
 			return
 		}
 
-		c.JSON(http.StatusOK, map[string]any{
-			"message": "Success",
-			"data":    product,
-		})
+		c.JSON(http.StatusOK, product)
 		c.Done()
 	}
 }
 
 func (controller *ProductController) Update() gin.HandlerFunc { // todo - investigate changes on the variant when changing the product.
 	return func(c *gin.Context) {
-		var product = models.Product{}
-		err := c.BindJSON(&product)
+		gtin := c.Param("gtin")
+		product, err := controller.productRepository.FetchByProduct(models.Product{GTIN: gtin})
 
 		if err != nil {
 			log.Printf(err.Error())
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
 			return
 		}
 
@@ -127,10 +120,7 @@ func (controller *ProductController) Update() gin.HandlerFunc { // todo - invest
 			return
 		}
 
-		c.JSON(http.StatusOK, map[string]any{
-			"message": "Product updated successfully",
-			"data":    product,
-		})
+		c.JSON(http.StatusOK, gin.H{"message": "Product updated successfully"})
 		c.Done()
 	}
 }
@@ -141,7 +131,7 @@ func (controller *ProductController) Delete() gin.HandlerFunc {
 		product, err := controller.productRepository.FetchByProduct(models.Product{GTIN: gtin})
 
 		if product.ID == 0 {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Product not found!"})
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Product not found!"})
 			return
 		}
 
@@ -161,12 +151,7 @@ func (controller *ProductController) Delete() gin.HandlerFunc {
 			return
 		}
 
-		message, _ := fmt.Printf("Product with id %s Has been deleted successfully", gtin)
-
-		c.JSON(http.StatusOK, map[string]any{
-			"message": message,
-			"data":    product,
-		})
+		c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Product with id %s has been deleted successfully", gtin)})
 		c.Done()
 	}
 }
