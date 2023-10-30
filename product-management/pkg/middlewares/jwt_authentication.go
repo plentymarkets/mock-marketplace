@@ -2,7 +2,9 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+	"product-management/pkg/client"
 )
 
 func Authenticate() gin.HandlerFunc {
@@ -10,24 +12,23 @@ func Authenticate() gin.HandlerFunc {
 		headerToken := c.GetHeader("Token")
 
 		if headerToken == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "missing header token",
-			})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing header token"})
 			c.Abort()
 			return
 		}
 
 		// Find User by token
+		requestURL := "http://host.docker.internal:3004/auth/validate" // TODO - Remove hardcoded stuff
+		response, err := client.GET(requestURL, headerToken)
 
-		// Validate Token to Auth
-		// token, err := http.Get("https://jsonplaceholder.typicode.com/posts/1")
-
-		//if err != nil {
-		//	log.Fatalln(err)
-		//}
-
-		// If:   token is valid save user to memory
-		// Else: Return Unvalid Token
+		if err != nil || response.StatusCode != http.StatusOK {
+			if headerToken == "" {
+				log.Printf(err.Error())
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot Authenticate"})
+				c.Abort()
+				return
+			}
+		}
 
 		c.Next()
 	}
