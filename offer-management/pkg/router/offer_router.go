@@ -15,12 +15,11 @@ func Offer(mariadb *gorm.DB, engine *gin.Engine) {
 	productRepository, _ := repositories.NewProductRepository(mariadb)
 	offerController := controllers.NewOfferController(offerRepository, productRepository)
 
-	offer := engine.Group("/api/offer").Use(middlewares.Authenticate())
+	offer := engine.Group("/offer").Use(middlewares.Authenticate())
 
 	offer.GET("/", offerController.GetAll())
 	offer.GET("/:id", offerController.GetByID())
 	offer.POST("/", offerController.Create())
-	offer.PUT("/", offerController.Update())
+	offer.PUT("/:id", offerController.Update())
 	offer.DELETE("/:id", offerController.Delete())
-	//offer.GET("/test", offerController.GetOffers2)
 }
