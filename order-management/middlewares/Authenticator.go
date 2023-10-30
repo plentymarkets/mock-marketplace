@@ -1,24 +1,22 @@
-package controller
+package middlewares
 
 import (
-	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"net/http"
-	"os"
+	"order-management/providers"
 )
 
 type Authenticator struct {
 	Token string `json:"token"`
 }
 
-func Validate() gin.HandlerFunc {
+func Authenticate(AuthenticationServiceUrl string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var authenticator Authenticator
 
 		if err := c.ShouldBindJSON(&authenticator); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "malformed request"})
+			c.Abort()
 			return
 		}
 
@@ -30,22 +28,9 @@ func Validate() gin.HandlerFunc {
 			return
 		}
 
-		authentication, err := jwt.Parse(authenticator.Token, func(t *jwt.Token) (interface{}, error) {
-			_, ok := t.Method.(*jwt.SigningMethodHMAC)
-
-			if !ok {
-				c.JSON(http.StatusUnauthorized, map[string]string{
-					"error": "invalid header token",
-				})
-				c.Abort()
-				return "", errors.New("something went wrong")
-			}
-
-			return []byte(os.Getenv("JWT_SECRET")), nil
-		})
+		authenticated, err := providers.Authentication(AuthenticationServiceUrl, authenticator.Token)
 
 		if err != nil {
-			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": err.Error(),
 			})
@@ -53,7 +38,7 @@ func Validate() gin.HandlerFunc {
 			return
 		}
 
-		if !authentication.Valid {
+		if !authenticated {
 			c.JSON(http.StatusUnauthorized, map[string]string{
 				"error": "invalid token",
 			})
@@ -61,8 +46,6 @@ func Validate() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, map[string]string{
-			"message": "valid token",
-		})
+		c.Next()
 	}
 }

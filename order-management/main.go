@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"order-management/database"
-	"order-management/middlewares/authenticator"
 	"order-management/migrate"
 	"order-management/routes"
 	"order-management/seed"
@@ -20,15 +19,10 @@ func main() {
 
 	databaseConnection := databaseFactory.GetConnection()
 
-	authenticatorFactory, err := authenticator.NewAuthenticator(os.Getenv("AUTHENTICATOR_DRIVER"))
+	var externalRouter routes.ExternalRouter
+	externalRouter = externalRouter.NewExternalRouter()
 
-	if err != nil {
-		log.Fatal("Could not create authenticator")
-	}
-
-	authenticatorService := authenticatorFactory.NewAuthenticator(routes.GetExternalRoutesConfig()["authenticationService"])
-
-	migrate.Migrate(databaseConnection)                             // Mode it to a separate main.go in cmd/migrate
-	seed.Seed(databaseConnection)                                   // Mode it to a separate main.go in cmd/migrate
-	routes.RegisterRoutes(databaseConnection, authenticatorService) // Why is the middleware injected in the Routing system?
+	migrate.Migrate(databaseConnection)
+	seed.Seed(databaseConnection)
+	routes.RegisterRoutes(databaseConnection, externalRouter)
 }

@@ -4,16 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"order-management/controllers"
-	"order-management/middlewares/authenticator"
+	"order-management/middlewares"
 	"os"
 )
 
-func RegisterRoutes(databaseConnection *gorm.DB, authenticator authenticator.Authenticator) {
+func RegisterRoutes(databaseConnection *gorm.DB, externalRouter ExternalRouter) {
 	orderController := controllers.OrderController{}
 
 	router := gin.Default()
 
-	routes := router.Group("/orders").Use(authenticator.Authenticate()) // Whi the authenticator is not implemented as a middleware?
+	routes := router.Group("/orders").Use(middlewares.Authenticate(externalRouter.GetRoute("authenticationService")))
 	routes.POST("/get", orderController.GetOrders(databaseConnection))
 	routes.POST("/update-status", orderController.UpdateOrderStatus(databaseConnection))
 

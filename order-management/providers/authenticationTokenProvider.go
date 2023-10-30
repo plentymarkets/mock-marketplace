@@ -1,51 +1,28 @@
 package providers
 
 import (
+	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 )
 
-type Token struct {
-	Token string `json:"token"`
-}
-
-// FetchToken
-// TODO: Should email and password be sent via Header?
-func FetchToken(url string, email string, password string, authenticationApiKey string) (*Token, error) {
+func Authentication(url string, token string) (bool, error) {
 	client := &http.Client{}
 
-	request, err := http.NewRequest("POST", url, nil)
+	data := map[string]string{"token": token}
+	jsonData, err := json.Marshal(data)
+
+	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	request.Header.Add("authenticationApiKey", authenticationApiKey)
-	request.Header.Add("email", email)
-	request.Header.Add("password", password)
+	request.Header.Add("content-type", "application/json")
 
 	response, err := client.Do(request)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-
-		}
-	}(response.Body)
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var token Token
-	err = json.Unmarshal(body, &token)
-	if err != nil {
-		return nil, err
-	}
-
-	return &token, nil
+	return response.StatusCode == http.StatusOK, nil
 }
