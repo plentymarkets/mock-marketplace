@@ -8,18 +8,38 @@ import (
 	"os"
 )
 
-func RegisterRoutes(databaseConnection *gorm.DB, externalRouter ExternalRouter) {
-	orderController := controllers.OrderController{}
+type Router struct {
+	engine         *gin.Engine
+	externalRouter *ExternalRouter
+	database       *gorm.DB
+}
 
-	router := gin.Default()
+func (router Router) NewRouter(databaseConnection *gorm.DB) Router {
+	router.engine = gin.Default()
 
-	routes := router.Group("/orders").Use(middlewares.Authenticate(externalRouter.GetRoute("authenticationService")))
-	routes.POST("/get", orderController.GetOrders(databaseConnection))
-	routes.POST("/update-status", orderController.UpdateOrderStatus(databaseConnection))
+	var externalRouter ExternalRouter
+	externalRouter = externalRouter.NewExternalRouter()
+	router.externalRouter = &externalRouter
 
-	err := router.Run(os.Getenv("GIN_PORT"))
+	router.database = databaseConnection
+
+	return router
+}
+
+func (router Router) RegisterRoutes() {
+	router.RegisterOrderRoutes()
+
+	err := router.engine.Run(os.Getenv("GIN_PORT"))
 
 	if err != nil {
 		panic(err.Error())
 	}
+}
+
+func (router Router) RegisterOrderRoutes() {
+	orderController := controllers.OrderController{}
+
+	routes := router.engine.Group("/orders").Use(middlewares.Authenticate(router.externalRouter.GetRoute("authenticationService")))
+	routes.POST("/get", orderController.GetOrders(router.database))
+	routes.POST("/update-status", orderController.UpdateOrderStatus(router.database))
 }
