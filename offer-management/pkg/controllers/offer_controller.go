@@ -20,8 +20,7 @@ type Person struct {
 	ID string `uri:"id" binding:"required,uuid"`
 }
 
-// TODO - Move this after testing!
-type OfferController struct {
+type OfferController struct { // TODO - Move this after testing!
 	offerRepository   repositories.OfferRepositoryContract
 	productRepository repositories.ProductRepositoryContract
 }
@@ -109,11 +108,11 @@ func (controller *OfferController) GetByID() gin.HandlerFunc {
 		}
 
 		if offer.ID == 0 {
-			c.JSON(http.StatusOK, map[string]any{
+			c.JSON(http.StatusNotFound, gin.H{
 				"data": nil,
 			})
 		} else {
-			c.JSON(http.StatusOK, map[string]any{
+			c.JSON(http.StatusOK, gin.H{
 				"data": offer,
 			})
 		}
@@ -121,16 +120,10 @@ func (controller *OfferController) GetByID() gin.HandlerFunc {
 	}
 }
 
-// TODO - Mode to Models
-type Request struct {
+type Request struct { // TODO - Mode to Models
 	ProductGTIN string       `json:"product_gtin" binding:"required"`
 	ProductSKU  string       `json:"product_sku"`
 	Offer       models.Offer `json:"offer" binding:"required"`
-}
-
-type Response struct {
-	Product models.Product `json:"data" binding:"required"`
-	Message string         `json:"message" binding:"required"`
 }
 
 func (controller *OfferController) Create() gin.HandlerFunc {
@@ -141,7 +134,7 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 
 		if err != nil {
 			log.Println(err.Error())
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Bad Request"})
 			return
 		}
 
@@ -153,31 +146,26 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 
 		if product.ID == 0 {
 
-			requestURL := fmt.Sprintf("http://localhost:3004/api/product/%s", request.ProductGTIN)
+			requestURL := fmt.Sprintf("http://host.docker.internal:3004/product/%s", request.ProductGTIN)
 			response, err := client.GET(requestURL)
 
 			if err != nil || response.StatusCode != http.StatusOK {
-				c.JSON(http.StatusOK, gin.H{"message": "Fail: Product not found"})
+				c.JSON(http.StatusNotFound, gin.H{"message": "Fail: Product not found"})
 				return
 			}
 
-			var jsonMap Response
-			body, _ := io.ReadAll(response.Body)
-			err = json.Unmarshal(body, &jsonMap)
+			body, err := io.ReadAll(response.Body)
+			err = json.Unmarshal(body, &product)
 
-			if err != nil || jsonMap.Product.GTIN == "" {
-				c.JSON(http.StatusOK, gin.H{"message": "Product does not Exists!"})
+			if err != nil || product.GTIN == "" {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error!"})
 				return
 			}
 
-			product = jsonMap.Product
 			product.Offers = append(product.Offers, offer)
 			product, err = controller.productRepository.Create(product)
 
-			c.JSON(http.StatusOK, gin.H{
-				"message": "Success",
-				"data":    product,
-			})
+			c.JSON(http.StatusOK, product)
 			return
 		}
 
@@ -198,7 +186,7 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 	}
 }
 
-func (controller *OfferController) Update() gin.HandlerFunc { // todo - investigate changes on the variant when changing the offer.
+func (controller *OfferController) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var offer = models.Offer{}
@@ -206,7 +194,7 @@ func (controller *OfferController) Update() gin.HandlerFunc { // todo - investig
 
 		if err != nil {
 			log.Printf(err.Error())
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			c.AbortWithStatusJSON(http.StatusOK, gin.H{"message": "kldjshflkjashdfkl;ashjdfh"})
 			return
 		}
 
@@ -218,9 +206,7 @@ func (controller *OfferController) Update() gin.HandlerFunc { // todo - investig
 			return
 		}
 
-		time.Sleep(100)
-
-		c.JSON(http.StatusOK, map[string]any{
+		c.JSON(http.StatusOK, gin.H{
 			"message": "Offer updated successfully",
 			"data":    offer,
 		})
@@ -249,7 +235,7 @@ func (controller *OfferController) Delete() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, map[string]any{
+		c.JSON(http.StatusOK, gin.H{
 			"message": "Offer with id " + id + " Has been deleted successfully",
 			"data":    offer,
 		})
