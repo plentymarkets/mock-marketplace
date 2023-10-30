@@ -11,8 +11,9 @@ import (
 func RegisterRoutes(databaseConnection *gorm.DB) {
 	router := gin.Default()
 
-	api := router.Group("/auth")
-	api.POST("/validate", controller.Auth(databaseConnection))
+	api := router.Group("/user")
+	api.POST("/validation", controller.Validate())
+	api.POST("/token", controller.RetrieveToken(databaseConnection))
 
 	err := router.Run(os.Getenv("GIN_PORT"))
 
