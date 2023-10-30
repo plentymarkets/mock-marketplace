@@ -50,9 +50,9 @@ func (repository *UserRepository) FetchByID(id string) (models.User, error) {
 	return user, tx.Error
 }
 
-func (repository *UserRepository) FetchByName(UserName string) (models.User, error) {
+func (repository *UserRepository) FetchByName(UserName string, givenPassword string) (models.User, error) {
 	var user models.User
-	tx := repository.database.Where("user_name = ?", UserName).Find(&user)
+	tx := repository.database.Where("user_name = ? AND user_password = ?", UserName, givenPassword).Find(&user)
 	return user, tx.Error
 }
 

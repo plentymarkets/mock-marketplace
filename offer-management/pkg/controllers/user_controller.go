@@ -203,50 +203,47 @@ func (controller *UserController) Delete() gin.HandlerFunc {
 	}
 }
 
+//func (controller *UserController) Login() gin.HandlerFunc {
+//	return func(c *gin.Context) {
+//		providedName := c.PostForm("user_name")
+//		providedPassword := c.PostForm("user_password")
+//
+//		if providedName == "" || providedPassword == "" {
+//			c.JSON(http.StatusBadRequest, gin.H{"message": "Missing input"})
+//			return
+//		}
+//
+//		fetchedUser, err := controller.userRepository.FetchByName(providedName)
+//
+//		if err != nil {
+//			log.Printf(err.Error())
+//			c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+//			return
+//		}
+//
+//		if fetchedUser.ID != 0 {
+//			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
+//			return
+//		}
+//
+//		c.JSON(http.StatusOK, gin.H{"token": "JWT-SECRET"})
+//	}
+//}
+
 func (controller *UserController) Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		providedName := c.PostForm("user_name")
-
-		if providedName == "" {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Missing input"})
-			return
-		}
-
-		providedPassword := c.PostForm("user_password")
-
-		if providedPassword == "" {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Missing input"})
-			return
-		}
-
+		providedName, providedPassword := c.PostForm("user_name"), c.PostForm("user_password")
 		fetchedUser, err := controller.userRepository.FetchByName(providedName)
 
-		if err != nil {
-			log.Printf(err.Error())
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
-			return
-		}
-
-		if fetchedUser.ID == 0 {
+		switch {
+		case providedName == "" || providedPassword == "":
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Missing input"})
+		case err != nil:
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+		case fetchedUser.ID != 0:
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
-			return
+		default:
+			c.JSON(http.StatusOK, gin.H{"token": "JWT-SECRET"})
 		}
-
-		storedName := fetchedUser.UserName
-
-		if providedName != storedName {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
-			return
-		}
-
-		storedPassword := fetchedUser.UserPassword
-
-		if providedPassword != storedPassword {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
-			return
-		}
-
-		token := "JWT-SECRET"
-		c.JSON(http.StatusOK, gin.H{"token": token})
 	}
 }
