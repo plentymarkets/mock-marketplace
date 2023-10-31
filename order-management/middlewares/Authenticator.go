@@ -1,10 +1,9 @@
 package middlewares
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"order-management/providers"
 )
 
 type Authenticator struct {
@@ -29,7 +28,7 @@ func Authenticate(AuthenticationServiceUrl string) gin.HandlerFunc {
 			return
 		}
 
-		authenticated, err := authenticationRequest(AuthenticationServiceUrl, authenticator.Token)
+		authenticated, err := providers.Authentication(AuthenticationServiceUrl, authenticator.Token)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{
@@ -49,25 +48,4 @@ func Authenticate(AuthenticationServiceUrl string) gin.HandlerFunc {
 
 		c.Next()
 	}
-}
-
-func authenticationRequest(url string, token string) (bool, error) {
-	client := &http.Client{}
-
-	data := map[string]string{"token": token}
-	jsonData, err := json.Marshal(data)
-
-	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return false, err
-	}
-
-	request.Header.Add("content-type", "application/json")
-
-	response, err := client.Do(request)
-	if err != nil {
-		return false, err
-	}
-
-	return response.StatusCode == http.StatusOK, nil
 }
