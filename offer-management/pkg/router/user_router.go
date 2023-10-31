@@ -17,7 +17,7 @@ func User(mariadb *gorm.DB, engine *gin.Engine) {
 	user := engine.Group("/api/user").Use(middlewares.Authenticate())
 
 	user.GET("/", userController.GetAll())
-	// user.GET("/:id", userController.GetByID())
+	user.GET("/:id", userController.GetByID())
 	user.POST("/login", userController.Login())
 	// user.GET("/:user_name", userController.GetByName())
 	user.POST("/", userController.Create())

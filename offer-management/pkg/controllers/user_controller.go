@@ -120,15 +120,47 @@ func (controller *UserController) GetByName() gin.HandlerFunc {
 	}
 }
 
+//func (controller *UserController) Create() gin.HandlerFunc {
+//	return func(c *gin.Context) {
+//
+//		var user = models.User{}
+//		err := c.BindJSON(&user)
+//
+//		if err != nil {
+//			log.Println(err.Error())
+//			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+//			return
+//		}
+//
+//		user, err = controller.userRepository.Create(user)
+//
+//		if err != nil {
+//			log.Printf(err.Error())
+//			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+//			return
+//		}
+//
+//		c.JSON(http.StatusOK, map[string]any{
+//			"message": "Success",
+//			"data":    user,
+//		})
+//		c.Done()
+//	}
+//}
+
 func (controller *UserController) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		var user = models.User{}
 		err := c.BindJSON(&user)
 
 		if err != nil {
 			log.Println(err.Error())
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			return
+		}
+
+		if err = user.EncryptPassword(user.EncryptedPassword); err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Error encrypting the password"})
 			return
 		}
 
@@ -140,7 +172,7 @@ func (controller *UserController) Create() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, map[string]any{
+		c.JSON(http.StatusOK, map[string]interface{}{
 			"message": "Success",
 			"data":    user,
 		})
@@ -159,6 +191,11 @@ func (controller *UserController) Update() gin.HandlerFunc {
 			return
 		}
 
+		if err = user.EncryptPassword(user.EncryptedPassword); err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Error encrypting the password"})
+			return
+		}
+
 		user, err = controller.userRepository.Update(user)
 
 		if err != nil {
@@ -167,7 +204,7 @@ func (controller *UserController) Update() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, map[string]any{
+		c.JSON(http.StatusOK, map[string]interface{}{
 			"message": "User updated successfully",
 			"data":    user,
 		})
@@ -203,44 +240,17 @@ func (controller *UserController) Delete() gin.HandlerFunc {
 	}
 }
 
-//func (controller *UserController) Login() gin.HandlerFunc {
-//	return func(c *gin.Context) {
-//		providedName := c.PostForm("user_name")
-//		providedPassword := c.PostForm("user_password")
-//
-//		if providedName == "" || providedPassword == "" {
-//			c.JSON(http.StatusBadRequest, gin.H{"message": "Missing input"})
-//			return
-//		}
-//
-//		fetchedUser, err := controller.userRepository.FetchByName(providedName)
-//
-//		if err != nil {
-//			log.Printf(err.Error())
-//			c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
-//			return
-//		}
-//
-//		if fetchedUser.ID != 0 {
-//			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
-//			return
-//		}
-//
-//		c.JSON(http.StatusOK, gin.H{"token": "JWT-SECRET"})
-//	}
-//}
-
 func (controller *UserController) Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		providedName, providedPassword := c.PostForm("user_name"), c.PostForm("user_password")
-		fetchedUser, err := controller.userRepository.FetchByName(providedName)
+		fetchedUser, err := controller.userRepository.FetchByCryptLogin(providedName, providedPassword)
 
 		switch {
 		case providedName == "" || providedPassword == "":
 			c.JSON(http.StatusBadRequest, gin.H{"message": "Missing input"})
 		case err != nil:
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
-		case fetchedUser.ID != 0:
+		case fetchedUser.ID == 0:
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
 		default:
 			c.JSON(http.StatusOK, gin.H{"token": "JWT-SECRET"})

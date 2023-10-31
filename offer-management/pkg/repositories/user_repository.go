@@ -50,10 +50,30 @@ func (repository *UserRepository) FetchByID(id string) (models.User, error) {
 	return user, tx.Error
 }
 
-func (repository *UserRepository) FetchByName(UserName string, givenPassword string) (models.User, error) {
+func (repository *UserRepository) FetchByName(UserName string) (models.User, error) {
+	var user models.User
+	tx := repository.database.Where("user_name = ?", UserName).Find(&user)
+	return user, tx.Error
+
+}
+
+func (repository *UserRepository) FetchByLogin(UserName string, givenPassword string) (models.User, error) {
 	var user models.User
 	tx := repository.database.Where("user_name = ? AND user_password = ?", UserName, givenPassword).Find(&user)
 	return user, tx.Error
+}
+
+func (repository *UserRepository) FetchByCryptLogin(UserName string, givenPassword string) (models.User, error) {
+	var user models.User
+	tx := repository.database.Where("user_name = ?", UserName).Find(&user)
+	if tx.Error != nil {
+		return user, tx.Error
+	}
+	if err := user.DecryptPassword(givenPassword); err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
 
 func (repository *UserRepository) Create(user models.User) (models.User, error) {
