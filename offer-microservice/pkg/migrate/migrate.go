@@ -7,7 +7,7 @@ import (
 
 func Migrate(databaseConnection *gorm.DB) error {
 	modelCollection := []Migrateable{
-		models.offer{},
+		models.Offer{},
 	}
 
 	for _, model := range modelCollection {

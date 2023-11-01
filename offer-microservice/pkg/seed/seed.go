@@ -2,7 +2,6 @@ package seed
 
 import (
 	"gorm.io/gorm"
-	"math/rand"
 	"offer-microservice/pkg/models"
 	"offer-microservice/pkg/repositories"
 )
@@ -12,7 +11,7 @@ func Seed(databaseConnection *gorm.DB) error {
 	isEmpty := checkIfTableIsEmpty(offerRepository)
 
 	if isEmpty {
-		offer := generateoffer()
+		offer := generateOffer()
 		transaction := offerRepository.Database.Create(&offer)
 		return transaction.Error
 	}
@@ -20,12 +19,12 @@ func Seed(databaseConnection *gorm.DB) error {
 	return nil
 }
 
-func generateoffer() models.Offer {
+func generateOffer() models.Offer {
 	offer := models.Offer{
 		SellerID:  1,
 		ProductID: 1,
-		Price:     "9,99",
-		Quantity:  rand.Int(),
+		Price:     "9.99",
+		Quantity:  12,
 	}
 
 	return offer
