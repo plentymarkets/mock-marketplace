@@ -146,8 +146,10 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 
 		if product.ID == 0 {
 
-			requestURL := fmt.Sprintf("http://host.docker.internal:3004/product/%s", request.ProductGTIN)
-			response, err := client.GET(requestURL)
+			endpoint := "/Product/'laskdjlkasdj"
+			apiToken := "ljHjuKSHDhduwhkHWUDHds8sd"
+			client := client.NewProductClient(endpoint, apiToken)
+			response, err := client.GetRequest()
 
 			if err != nil || response.StatusCode != http.StatusOK {
 				c.JSON(http.StatusNotFound, gin.H{"message": "Fail: Product not found"})
