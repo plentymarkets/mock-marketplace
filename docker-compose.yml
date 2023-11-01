@@ -3,17 +3,17 @@ version: '3'
 services:
 
   #   Database service
-  auth-database:
+  user-microservice-database:
     image: mariadb:latest
-    container_name: auth_database
+    container_name: user_microservice_database
     env_file:
-      - auth/.env
+      - user-microservice/.env
     ports:
       - "3301:3306"
     networks:
       - my_network
     volumes:
-      - auth-data:/var/lib/mysql
+      - user-data:/var/lib/mysql
 
   offer-management-database:
     image: mariadb:latest
@@ -27,11 +27,11 @@ services:
     volumes:
       - offer-data:/var/lib/mysql
 
-  order-management-database:
+  order-microservice-database:
     image: mariadb:latest
-    container_name: order_management_database
+    container_name: order_microservice_database
     env_file:
-      - order-management/.env
+      - order-microservice/.env
     ports:
       - "3303:3306"
     networks:
@@ -52,18 +52,18 @@ services:
       - product-data:/var/lib/mysql
 
   # Microservice 1
-  auth:
+  user-microservice:
     build:
-      context: ./auth
-    container_name: auth
+      context: user-microservice
+    container_name: user-microservice
     ports:
       - "3001:3001"
     env_file:
-      - auth/.env
+      - user-microservice/.env
     networks:
       - my_network
     depends_on:
-      - auth-database
+      - user-microservice-database
     restart: on-failure
 
   # Microservice 2
@@ -82,18 +82,18 @@ services:
     restart: on-failure
 
   # Microservice 3
-  order-management:
+  order-microservice:
     build:
-      context: ./order-management
-    container_name: order-management
+      context: order-microservice
+    container_name: order-microservice
     ports:
       - "3003:3003"
     env_file:
-      - order-management/.env
+      - order-microservice/.env
     networks:
       - my_network
     depends_on:
-      - order-management-database
+      - order-microservice-database
     restart: on-failure
 
   # Microservice 3
@@ -115,7 +115,7 @@ networks:
   my_network:
 
 volumes:
-  auth-data:
+  user-data:
   offer-data:
   order-data:
   product-data:
