@@ -2,17 +2,18 @@ package database
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 )
 
 func GetMariaDBDSN() string {
 	// Get the database connection details from environment variables
-	dbHost := os.Getenv("MYSQL_TCP_HOST")          // Defaults to localhost
-	dbPort := os.Getenv("PRODUCTS_MYSQL_TCP_PORT") // Defaults to 3306
-	dbUser := os.Getenv("MYSQL_USER")              // Defaults to root
-	dbPass := os.Getenv("MYSQL_PASSWORD")          // Defaults to empty string
-	dbName := os.Getenv("MYSQL_DATABASE")
-	dbTimezone := os.Getenv("MYSQL_TIMEZONE")
+	dbHost := url.QueryEscape(os.Getenv("MYSQL_HOST"))
+	dbPort := url.QueryEscape(os.Getenv("MYSQL_PORT"))
+	dbUser := url.QueryEscape(os.Getenv("MYSQL_USER"))
+	dbPass := url.QueryEscape(os.Getenv("MYSQL_PASSWORD"))
+	dbName := url.QueryEscape(os.Getenv("MYSQL_DATABASE"))
+	dbTimezone := url.QueryEscape(os.Getenv("MYSQL_TIMEZONE"))
 
 	// Create the database connection string
 	dsn := fmt.Sprintf(
