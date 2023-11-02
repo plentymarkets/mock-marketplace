@@ -5,7 +5,7 @@ services:
   auth-database:
     image: mariadb:latest
     container_name: auth_database
-    env_file: test.env
+    env_file: .env
     ports:
       - "3301:3306"
     networks:
@@ -14,7 +14,7 @@ services:
   offer-management-database:
     image: mariadb:latest
     container_name: offer_management_database
-    env_file: test.env
+    env_file: .env
     ports:
       - "3302:3306"
     networks:
@@ -23,7 +23,7 @@ services:
   order-management-database:
     image: mariadb:latest
     container_name: order_management_database
-    env_file: test.env
+    env_file: .env
     ports:
       - "3303:3306"
     networks:
@@ -32,7 +32,7 @@ services:
   product-management-database:
     image: mariadb:latest
     container_name: product_management_database
-    env_file: test.env
+    env_file: .env
     ports:
       - "3304:3306"
     networks:
@@ -45,7 +45,7 @@ services:
     container_name: auth
     ports:
       - "3001:3001"
-    env_file: test.env
+    env_file: .env
     environment:
       MYSQL_TCP_HOST: host.docker.internal
     networks:
@@ -61,7 +61,7 @@ services:
     container_name: offer-management
     ports:
       - "3002:3002"
-    env_file: test.env
+    env_file: .env
     environment:
       MYSQL_TCP_HOST: host.docker.internal
     networks:
@@ -76,7 +76,7 @@ services:
     container_name: order-management
     ports:
       - "3003:3003"
-    env_file: test.env
+    env_file: .env
     environment:
       MYSQL_TCP_HOST: host.docker.internal
     networks:
@@ -91,7 +91,7 @@ services:
     container_name: product-management
     ports:
       - "3004:3004"
-    env_file: test.env
+    env_file: .env
     environment:
       MYSQL_TCP_HOST: host.docker.internal
     networks:

@@ -1,11 +1,10 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"log"
 	"offer-management/pkg/database"
 	"offer-management/pkg/router"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
