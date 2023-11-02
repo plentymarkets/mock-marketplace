@@ -7,9 +7,9 @@ import (
 )
 
 func main() {
-	dsn := database.GetMariaDBDSN()
+	dsn := database.GetMariaDBDSN() // Got Empty, want stuff
 
-	db := database.CreateConnection(dsn)
+	db := database.CreateConnection(dsn) // Hotfix, insert .env file via play button
 
 	err := db.AutoMigrate(&models.Product{})
 	if err != nil {

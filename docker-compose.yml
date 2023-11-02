@@ -54,6 +54,7 @@ services:
       - auth-database
 
   # Microservice 2
+  # migrate here
   offer-management:
     build:
       context: ./offer-management

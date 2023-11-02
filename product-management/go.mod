@@ -1,4 +1,4 @@
-module auth
+module product-management
 
 go 1.16
 

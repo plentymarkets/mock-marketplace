@@ -8,6 +8,7 @@ import (
 
 func GetMariaDBDSN() string {
 	// Get the database connection details from environment variables
+	// Read from this file (make dir)
 	dbHost := os.Getenv("MYSQL_TCP_HOST")       // Defaults to localhost
 	dbPort := os.Getenv("OFFER_MYSQL_TCP_PORT") // Defaults to 3306
 	dbUser := os.Getenv("MYSQL_USER")           // Defaults to root

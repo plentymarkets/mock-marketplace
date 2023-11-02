@@ -1,4 +1,4 @@
-module auth
+module order-management
 
 go 1.16
 
