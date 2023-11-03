@@ -15,6 +15,7 @@ func main() {
 
 	router.Offer(con, engine)
 	router.User(con, engine)
+	router.Order(con, engine)
 
 	err := engine.Run(":3002")
 

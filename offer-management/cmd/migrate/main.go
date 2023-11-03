@@ -15,13 +15,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
 	err = db.AutoMigrate(&models.Offer{})
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	err = db.AutoMigrate(&models.User{})
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	err = db.AutoMigrate(&models.Order{})
 	if err != nil {
 		log.Fatal(err.Error())
 	}
