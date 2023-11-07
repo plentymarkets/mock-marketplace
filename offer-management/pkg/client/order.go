@@ -18,8 +18,7 @@ func NewOrderClient(endpoint string, apiToken string) ProductContract {
 	}
 }
 
-func (client OrderClient) GetRequest() (*http.Response, error) {
-
+func (client OrderClient) Get() (*http.Response, error) {
 	request := Request{}
 	request.URL = fmt.Sprintf("%s%s", os.Getenv("PRODUCTS_URL"), client.Endpoint)
 	request.Token = client.ApiToken

@@ -16,10 +16,6 @@ import (
 
 const OffersPerPage = 10
 
-type Person struct {
-	ID string `uri:"id" binding:"required,uuid"`
-}
-
 type OfferController struct { // TODO - Move this after testing!
 	offerRepository   repositories.OfferRepositoryContract
 	productRepository repositories.ProductRepositoryContract
@@ -146,13 +142,19 @@ func (controller *OfferController) Create() gin.HandlerFunc {
 
 		if product.ID == 0 {
 
-			endpoint := "/Product/'laskdjlkasdj"
 			apiToken := "ljHjuKSHDhduwhkHWUDHds8sd"
-			client := client.NewProductClient(endpoint, apiToken)
-			response, err := client.GetRequest()
 
-			if err != nil || response.StatusCode != http.StatusOK {
-				c.JSON(http.StatusNotFound, gin.H{"message": "Fail: Product not found"})
+			productClient := client.NewProductClient("", apiToken)
+			response, err := productClient.GetProduct("01234567890123")
+
+			if err != nil {
+				log.Print(err.Error())
+				c.JSON(http.StatusNotFound, gin.H{"message": "Internal server Error"})
+				return
+			}
+
+			if response.StatusCode != http.StatusOK {
+				c.JSON(http.StatusNotFound, gin.H{"message": "Product not found"})
 				return
 			}
 
