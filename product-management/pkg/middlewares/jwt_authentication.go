@@ -18,16 +18,14 @@ func Authenticate() gin.HandlerFunc {
 		}
 
 		// Find User by token
-		requestURL := "http://host.docker.internal:3004/auth/validate" // TODO - Remove hardcoded stuff
-		response, err := client.GET(requestURL, headerToken)
+		authRequest := client.NewAuthTokenClient("auth/validate", "TestToken")
+		response, err := authRequest.ValidateToken()
 
 		if err != nil || response.StatusCode != http.StatusOK {
-			if headerToken == "" {
-				log.Printf(err.Error())
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot Authenticate"})
-				c.Abort()
-				return
-			}
+			log.Printf(err.Error())
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot Authenticate"})
+			c.Abort()
+			return
 		}
 
 		c.Next()
