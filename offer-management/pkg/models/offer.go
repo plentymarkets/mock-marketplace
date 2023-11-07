@@ -2,6 +2,7 @@ package models
 
 type Offer struct {
 	ID        uint    `gorm:"primarykey"`
+	UserID    uint    `gorm:"<-" json:"-"`
 	ProductID uint    `gorm:"<-" json:"product_id" binding:"required"`
 	UUID      string  `gorm:"<-" json:"uuid" binding:"required"`
 	Price     float32 `gorm:"<-" json:"price" binding:"required"`
