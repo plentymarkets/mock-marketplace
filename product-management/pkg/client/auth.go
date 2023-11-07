@@ -1,66 +1,69 @@
 package client
 
 import (
-	"fmt"
+	"bytes"
+	"encoding/json"
+	"log"
 	"net/http"
-	"os"
 )
 
-type AuthClient struct {
-	Endpoint string
-	ApiToken string
-	Username string
-	Password string
+type AuthUserRequestBody struct {
+	Username string `json:"email"`
+	Password string `json:"password"`
+	ApiToken string `json:"authenticationApiKey"`
 }
 
-func NewAuthClient(endpoint string, apiToken string, username string, password string) AuthClient {
-	return AuthClient{
-		Endpoint: endpoint,
-		ApiToken: apiToken,
+func NewAuthUserRequest(username string, password string, apiToken string) ([]byte, error) {
+	request := AuthUserRequestBody{
 		Username: username,
 		Password: password,
-	}
-}
-
-func NewAuthUserClient(endpoint string, username string, password string) AuthClient {
-	return AuthClient{
-		Endpoint: endpoint,
-		Username: username,
-		Password: password,
-	}
-}
-
-func NewAuthTokenClient(endpoint string, apiToken string) AuthClient {
-	return AuthClient{
-		Endpoint: endpoint,
 		ApiToken: apiToken,
 	}
+
+	return json.Marshal(request)
 }
 
-func (client AuthClient) Authenticate() (*http.Response, error) {
-
-	request := Request{}
-	request.URL = fmt.Sprintf("%s%s", os.Getenv("AUTH_URL"), "/")
-	request.Username = client.Username
-	request.Password = client.Password
-
-	return GET(request)
+type AuthTokenRequestBody struct {
+	ApiToken string `json:"token"`
 }
 
-func (client AuthClient) ValidateToken() (*http.Response, error) {
+func NewAuthTokenRequest(apiToken string) ([]byte, error) {
+	request := AuthTokenRequestBody{
+		ApiToken: apiToken,
+	}
 
-	request := Request{}
-	request.URL = fmt.Sprintf("%s%s", os.Getenv("AUTH_URL"), client.Endpoint)
-	request.Token = client.ApiToken
-
-	return GET(request)
+	return json.Marshal(request)
 }
 
-func (client AuthClient) Get() (*http.Response, error) {
+func Authenticate(username string, password string) (*http.Response, error) {
 
-	request := Request{}
-	request.URL = fmt.Sprintf("%s%s", os.Getenv("PRODUCTS_URL"), client.Endpoint)
-	request.Token = client.ApiToken
+	body, err := NewAuthUserRequest(username, password, "test")
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, err
+	}
 
-	return GET(request)
+	httpClient := &http.Client{}
+	return httpClient.Post(
+		"http://localhost:3001/user/token", // TODO - Remove hardcoding
+		"application/json",
+		bytes.NewBuffer(body),
+	)
+}
+
+func ValidateToken(token string) (*http.Response, error) {
+
+	body, err := NewAuthTokenRequest(token)
+
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, err
+	}
+
+	httpClient := &http.Client{} // TODO - Remove hardcoding
+	return httpClient.Post(
+		"http://localhost:3001/user/validation",
+		"application/json",
+		bytes.NewBuffer(body),
+	)
 }

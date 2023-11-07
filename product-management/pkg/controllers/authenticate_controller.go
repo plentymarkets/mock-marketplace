@@ -3,9 +3,12 @@ package controllers
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"io"
 	"log"
 	"net/http"
+	"product-management/pkg/client"
 	"product-management/pkg/models"
 	"product-management/pkg/repositories"
 )
@@ -36,12 +39,23 @@ func (controller *AuthenticateController) Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		// TODO - Create request to auth
-		// token, err := http.Get("https://jsonplaceholder.typicode.com/posts/1")
-		token := "Update_token_with_one_retrieved_from_Auth"
+		response, err := client.Authenticate(person.Username, person.Password)
+
+		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Cannot Authenticate"})
+			return
+		}
+
+		body, err := io.ReadAll(response.Body)
+
+		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Internal server error "})
+			return
+		}
 
 		uuid := mdHashing(person.Username)
-
 		user := models.User{UUID: uuid}
 		user, err = controller.userRepository.FetchByUser(user)
 
@@ -52,7 +66,10 @@ func (controller *AuthenticateController) Authenticate() gin.HandlerFunc {
 		}
 
 		user.UUID = uuid
-		user.Token = token
+		err = json.Unmarshal(body, &user)
+		if err != nil {
+			return
+		}
 
 		message := ""
 
