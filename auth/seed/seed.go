@@ -3,16 +3,8 @@ package seed
 import (
 	"auth/models"
 	"auth/repositories"
-	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 )
-
-func init() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		panic(err.Error())
-	}
-}
 
 func Seed(database *gorm.DB) {
 	userRepository := repositories.NewRepository(database)
