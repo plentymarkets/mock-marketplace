@@ -1,7 +1,8 @@
 version: '3'
-services:
-#   Database service
 
+services:
+
+  #   Database service
   auth-database:
     image: mariadb:latest
     container_name: auth_database
@@ -10,6 +11,8 @@ services:
       - "3301:3306"
     networks:
       - my_network
+    volumes:
+      - auth-data:/var/lib/mysql
 
   offer-management-database:
     image: mariadb:latest
@@ -19,6 +22,8 @@ services:
       - "3302:3306"
     networks:
       - my_network
+    volumes:
+      - offer-data:/var/lib/mysql
 
   order-management-database:
     image: mariadb:latest
@@ -28,6 +33,8 @@ services:
       - "3303:3306"
     networks:
       - my_network
+    volumes:
+      - order-data:/var/lib/mysql
 
   product-management-database:
     image: mariadb:latest
@@ -37,6 +44,8 @@ services:
       - "3304:3306"
     networks:
       - my_network
+    volumes:
+      - product-data:/var/lib/mysql
 
   # Microservice 1
   auth:
@@ -46,12 +55,11 @@ services:
     ports:
       - "3001:3001"
     env_file: .env
-    environment:
-      MYSQL_TCP_HOST: host.docker.internal
     networks:
       - my_network
     depends_on:
       - auth-database
+    restart: on-failure
 
   # Microservice 2
   offer-management:
@@ -61,12 +69,11 @@ services:
     ports:
       - "3002:3002"
     env_file: .env
-    environment:
-      MYSQL_TCP_HOST: host.docker.internal
     networks:
       - my_network
     depends_on:
       - offer-management-database
+    restart: on-failure
 
   # Microservice 3
   order-management:
@@ -76,12 +83,11 @@ services:
     ports:
       - "3003:3003"
     env_file: .env
-    environment:
-      MYSQL_TCP_HOST: host.docker.internal
     networks:
       - my_network
     depends_on:
       - order-management-database
+    restart: on-failure
 
   # Microservice 3
   product-management:
@@ -91,12 +97,17 @@ services:
     ports:
       - "3004:3004"
     env_file: .env
-    environment:
-      MYSQL_TCP_HOST: host.docker.internal
     networks:
       - my_network
     depends_on:
       - product-management-database
+    restart: on-failure
 
 networks:
   my_network:
+
+volumes:
+  auth-data:
+  offer-data:
+  order-data:
+  product-data:
