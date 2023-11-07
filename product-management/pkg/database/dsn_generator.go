@@ -12,11 +12,12 @@ func GetMariaDBDSN() string {
 	dbUser := os.Getenv("MYSQL_USER")              // Defaults to root
 	dbPass := os.Getenv("MYSQL_PASSWORD")          // Defaults to empty string
 	dbName := os.Getenv("MYSQL_DATABASE")
+	dbTimezone := os.Getenv("MYSQL_TIMEZONE")
 
 	// Create the database connection string
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?parseTime=true",
-		dbUser, dbPass, dbHost, dbPort, dbName,
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=%s",
+		dbUser, dbPass, dbHost, dbPort, dbName, dbTimezone,
 	)
 
 	return dsn
