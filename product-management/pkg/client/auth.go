@@ -3,8 +3,10 @@ package client
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 type AuthUserRequestBody struct {
@@ -37,15 +39,20 @@ func NewAuthTokenRequest(apiToken string) ([]byte, error) {
 
 func Authenticate(username string, password string) (*http.Response, error) {
 
-	body, err := NewAuthUserRequest(username, password, "test")
+	body, err := NewAuthUserRequest(username, password, os.Getenv("AUTHENTICATION_API_KEY"))
 	if err != nil {
 		log.Printf(err.Error())
 		return nil, err
 	}
 
+	authURL := fmt.Sprintf("%s:%s",
+		os.Getenv("AUTH_URL"),
+		"/user/token",
+	)
+
 	httpClient := &http.Client{}
 	return httpClient.Post(
-		"http://localhost:3001/user/token", // TODO - Remove hardcoding
+		authURL,
 		"application/json",
 		bytes.NewBuffer(body),
 	)
@@ -60,9 +67,14 @@ func ValidateToken(token string) (*http.Response, error) {
 		return nil, err
 	}
 
-	httpClient := &http.Client{} // TODO - Remove hardcoding
+	authURL := fmt.Sprintf("%s:%s",
+		os.Getenv("AUTH_URL"),
+		"/user/validation",
+	)
+
+	httpClient := &http.Client{}
 	return httpClient.Post(
-		"http://localhost:3001/user/validation",
+		authURL,
 		"application/json",
 		bytes.NewBuffer(body),
 	)
