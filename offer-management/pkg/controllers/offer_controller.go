@@ -36,6 +36,7 @@ func (controller *OfferController) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		gtin := c.DefaultQuery("gtin", "")
+
 		if gtin != "" {
 
 			var product = models.Product{GTIN: gtin}
