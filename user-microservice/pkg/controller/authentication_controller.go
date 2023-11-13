@@ -9,36 +9,21 @@ import (
 	"os"
 )
 
-type Authenticator struct {
-	Token string `json:"token"`
-}
-
 func Validate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var authenticator Authenticator
+		token := c.GetHeader("token")
 
-		if err := c.ShouldBindJSON(&authenticator); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "malformed request"})
-			return
-		}
-
-		if authenticator.Token == "" {
-			c.JSON(http.StatusUnauthorized, map[string]string{
+		if token == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
 				"error": "missing token",
 			})
-			c.Abort()
 			return
 		}
 
-		authentication, err := jwt.Parse(authenticator.Token, func(t *jwt.Token) (interface{}, error) {
+		authentication, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 			_, ok := t.Method.(*jwt.SigningMethodHMAC)
-
 			if !ok {
-				c.JSON(http.StatusUnauthorized, map[string]string{
-					"error": "invalid header token",
-				})
-				c.Abort()
-				return "", errors.New("something went wrong")
+				return nil, errors.New("invalid token")
 			}
 
 			return []byte(os.Getenv("JWT_SECRET")), nil
@@ -46,18 +31,16 @@ func Validate() gin.HandlerFunc {
 
 		if err != nil {
 			fmt.Println(err.Error())
-			c.JSON(http.StatusInternalServerError, map[string]string{
+			c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
 				"error": err.Error(),
 			})
-			c.Abort()
 			return
 		}
 
 		if !authentication.Valid {
-			c.JSON(http.StatusUnauthorized, map[string]string{
+			c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
 				"error": "invalid token",
 			})
-			c.Abort()
 			return
 		}
 
