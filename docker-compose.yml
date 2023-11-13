@@ -15,18 +15,6 @@ services:
     volumes:
       - user-data:/var/lib/mysql
 
-  offer-management-database:
-    image: mariadb:latest
-    container_name: offer_management_database
-    env_file:
-      - offer-management/.env
-    ports:
-      - "3302:3306"
-    networks:
-      - my_network
-    volumes:
-      - offer-data:/var/lib/mysql
-
   order-microservice-database:
     image: mariadb:latest
     container_name: order_microservice_database
@@ -76,21 +64,6 @@ services:
       - my_network
     depends_on:
       - user-microservice-database
-    restart: on-failure
-
-  # Microservice 2
-  offer-management:
-    build:
-      context: ./offer-management
-    container_name: offer-management
-    ports:
-      - "3002:3002"
-    env_file:
-      - offer-management/.env
-    networks:
-      - my_network
-    depends_on:
-      - offer-management-database
     restart: on-failure
 
   # Microservice 3
