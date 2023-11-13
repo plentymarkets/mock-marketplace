@@ -13,7 +13,7 @@ func Auth(mariadb *gorm.DB, engine *gin.Engine) {
 	userRepository, _ := repositories.NewUserRepository(mariadb)
 	authController := controllers.NewAuthenticateController(userRepository)
 
-	product := engine.Group("/auth")
+	product := engine.Group("/user")
 
 	product.POST("/", authController.Authenticate())
 }

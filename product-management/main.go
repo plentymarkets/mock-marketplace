@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"log"
+	"os"
 	"product-management/pkg/database"
 	"product-management/pkg/router"
 )
@@ -17,7 +18,7 @@ func main() {
 	router.Product(con, engine)
 	router.Variant(con, engine)
 
-	err := engine.Run(":3004")
+	err := engine.Run(os.Getenv("GIN_PORT"))
 
 	if err != nil {
 		log.Fatal(err.Error())
