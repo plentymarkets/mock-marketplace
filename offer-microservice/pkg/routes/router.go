@@ -27,7 +27,7 @@ func (router Router) NewRouter(databaseConnection *gorm.DB) Router {
 }
 
 func (router Router) RegisterRoutes() {
-	router.RegisterofferRoutes()
+	router.RegisterOfferRoutes()
 
 	err := router.engine.Run(os.Getenv("GIN_PORT"))
 
@@ -36,10 +36,10 @@ func (router Router) RegisterRoutes() {
 	}
 }
 
-func (router Router) RegisterofferRoutes() {
-	offerController := controllers.offerController{}
+func (router Router) RegisterOfferRoutes() {
+	offerController := controllers.OfferController{}
 
 	routes := router.engine.Group("/offers").Use(middlewares.Authenticate(router.externalRouter.GetRoute("authenticationService")))
-	routes.POST("/get", offerController.Getoffers(router.database))
-	routes.POST("/update-status", offerController.UpdateofferStatus(router.database))
+	routes.POST("/", offerController.CreateOffer(router.database))
+	routes.GET("//:offerId", offerController.GetOfferById(router.database))
 }

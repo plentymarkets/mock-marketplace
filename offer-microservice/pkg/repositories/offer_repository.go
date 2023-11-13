@@ -174,3 +174,8 @@ func (offerRepository OfferRepository) FindByFields(fields map[string]string, of
 
 	return &offers, nil
 }
+
+func (offerRepository OfferRepository) Create(offer models.Offer) (models.Offer, error) {
+	transaction := offerRepository.Database.Create(&offer)
+	return offer, transaction.Error
+}

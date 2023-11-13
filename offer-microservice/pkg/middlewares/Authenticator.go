@@ -1,27 +1,15 @@
 package middlewares
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-type Authenticator struct {
-	Token string `json:"token"`
-}
-
 func Authenticate(AuthenticationServiceUrl string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var authenticator Authenticator
+		token := c.GetHeader("Token")
 
-		if err := c.ShouldBindJSON(&authenticator); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "malformed request"})
-			c.Abort()
-			return
-		}
-
-		if authenticator.Token == "" {
+		if token == "" {
 			c.JSON(http.StatusUnauthorized, map[string]string{
 				"error": "missing token",
 			})
@@ -29,7 +17,7 @@ func Authenticate(AuthenticationServiceUrl string) gin.HandlerFunc {
 			return
 		}
 
-		authenticated, err := authenticationRequest(AuthenticationServiceUrl, authenticator.Token)
+		authenticated, err := authenticationRequest(AuthenticationServiceUrl, token)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{
@@ -54,15 +42,12 @@ func Authenticate(AuthenticationServiceUrl string) gin.HandlerFunc {
 func authenticationRequest(url string, token string) (bool, error) {
 	client := &http.Client{}
 
-	data := map[string]string{"token": token}
-	jsonData, err := json.Marshal(data)
-
-	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return false, err
 	}
 
-	request.Header.Add("content-type", "application/json")
+	request.Header.Add("Token", token)
 
 	response, err := client.Do(request)
 	if err != nil {

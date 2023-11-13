@@ -4,108 +4,70 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
+	"offer-microservice/pkg/models"
 	"offer-microservice/pkg/repositories"
 	"strconv"
 )
 
-type offerController struct{}
+type OfferController struct{}
 
-func (controller *offerController) Createoffer() gin.HandlerFunc {
+func (controller *OfferController) CreateOffer(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Create offer
-	}
-}
-
-func (controller *offerController) UpdateofferStatus(databaseConnection *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		sellerId, err := strconv.Atoi(c.GetHeader("sellerId"))
+		var offer = models.Offer{}
+		err := c.BindJSON(&offer)
 
 		if err != nil {
 			c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "Invalid seller id",
-			})
-			c.Abort()
-			return
-		}
-
-		offerId, err := strconv.Atoi(c.GetHeader("offerId"))
-
-		if err != nil {
-			c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "Invalid offer id",
-			})
-			c.Abort()
-			return
-		}
-
-		status := c.GetHeader("status")
-
-		if status == "" {
-			c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "Invalid new status",
+				"error": "Invalid request body",
 			})
 			c.Abort()
 			return
 		}
 
 		offerRepository := repositories.NewOfferRepository(databaseConnection)
-
-		fields := map[string]string{
-			"seller_id": strconv.Itoa(sellerId),
-			"id":        strconv.Itoa(offerId),
-		}
-
-		offer, err := offerRepository.FindOneByFields(fields)
+		offer, err = offerRepository.Create(offer)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": "Could not retrieve offer",
+				"error": "Could not create offer",
 			})
 			c.Abort()
 			return
 		}
 
-		if offer == nil {
-			c.JSON(http.StatusNotFound, map[string]string{
-				"error": "offer not found",
-			})
-			c.Abort()
-			return
-		}
-
-		offer.Status = status
-		transaction := offerRepository.Database.Save(&offer)
-
-		if transaction.Error != nil {
-			c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": "Could not update offer",
-			})
-			c.Abort()
-			return
-		}
-
-		c.JSON(http.StatusOK, map[string]string{
-			"message": "offer updated successfully",
-		})
-
+		c.JSON(http.StatusOK, offer)
 		c.Done()
 	}
 }
 
-func (controller *offerController) Getoffers(databaseConnection *gorm.DB) gin.HandlerFunc {
+func (controller *OfferController) GetOffers(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sellerId, err := strconv.Atoi(c.GetHeader("sellerId"))
+		sellerId := c.Param("sellerId")
+
+		page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 
 		if err != nil {
 			c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "Invalid seller id",
+				"error": "Invalid page",
 			})
 			c.Abort()
 			return
 		}
 
+		limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid limit",
+			})
+			c.Abort()
+			return
+		}
+
+		offset := (page - 1) * limit
+
 		offerRepository := repositories.NewOfferRepository(databaseConnection)
-		offers, err := offerRepository.FindByField("seller_id", strconv.Itoa(sellerId), nil, nil)
+		offers, err := offerRepository.FindByField("seller_id", sellerId, &offset, &limit)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{
@@ -120,8 +82,30 @@ func (controller *offerController) Getoffers(databaseConnection *gorm.DB) gin.Ha
 	}
 }
 
-func (controller *offerController) GetofferById() gin.HandlerFunc {
+func (controller *OfferController) GetOfferById(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get offer by id
+		offerId, err := strconv.Atoi(c.Param("offerId"))
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid offer id",
+			})
+			c.Abort()
+			return
+		}
+
+		offerRepository := repositories.NewOfferRepository(databaseConnection)
+		offer, err := offerRepository.FindOneById(offerId)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Could not retrieve offer",
+			})
+			c.Abort()
+			return
+		}
+
+		c.JSON(http.StatusOK, offer)
+		c.Done()
 	}
 }

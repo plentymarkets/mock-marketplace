@@ -8,7 +8,7 @@ type ExternalRouter struct {
 
 func (externalRouter *ExternalRouter) NewExternalRouter() ExternalRouter {
 	externalRouter.routes = map[string]string{
-		"authenticationService": os.Getenv("AUTHENTICATOR_URL") + "/user-microservice/validation",
+		"authenticationService": os.Getenv("AUTHENTICATOR_MICROSERVICE_URL") + "/user/validation",
 	}
 	return *externalRouter
 }

@@ -21,10 +21,10 @@ func Seed(databaseConnection *gorm.DB) error {
 
 func generateOffer() models.Offer {
 	offer := models.Offer{
-		SellerID:  1,
-		ProductID: 1,
-		Price:     "9.99",
-		Quantity:  12,
+		SellerID: 1,
+		Gtin:     123456789,
+		Price:    9.99,
+		Quantity: 12,
 	}
 
 	return offer
