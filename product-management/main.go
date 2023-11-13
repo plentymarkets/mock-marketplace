@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"os"
@@ -18,7 +19,11 @@ func main() {
 	router.Product(con, engine)
 	router.Variant(con, engine)
 
-	err := engine.Run(os.Getenv("GIN_PORT"))
+	address := fmt.Sprintf("%s:%s",
+		os.Getenv("HOST"),
+		os.Getenv("PRODUCT_PORT"),
+	)
+	err := engine.Run(address)
 
 	if err != nil {
 		log.Fatal(err.Error())

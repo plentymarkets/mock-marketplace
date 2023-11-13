@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"log"
@@ -15,7 +16,11 @@ func RegisterRoutes(databaseConnection *gorm.DB) {
 	api.GET("/validation", controller.Validate())
 	api.POST("/token", controller.RetrieveToken(databaseConnection))
 
-	err := router.Run(os.Getenv("GIN_PORT"))
+	address := fmt.Sprintf("%s:%s",
+		os.Getenv("HOST"),
+		os.Getenv("AUTH_PORT"),
+	)
+	err := router.Run(address)
 
 	if err != nil {
 		log.Fatal(err.Error())

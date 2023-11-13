@@ -8,9 +8,9 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"product-management/pkg/client"
-	"product-management/pkg/models"
-	"product-management/pkg/repositories"
+	"offer-management/pkg/client"
+	"offer-management/pkg/models"
+	"offer-management/pkg/repositories"
 )
 
 type Person struct {
