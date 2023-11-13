@@ -1,49 +1,38 @@
 package middlewares
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"order-microservice/pkg/routes/external_router"
 )
 
-type Authenticator struct {
-	Token string `json:"token"`
-}
-
-func Authenticate(AuthenticationServiceUrl string) gin.HandlerFunc {
+func Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var authenticator Authenticator
+		externalRouter := external_router.NewExternalRouter()
+		authenticationServiceRoute := externalRouter.GetRoute("validate-token", nil)
 
-		if err := c.ShouldBindJSON(&authenticator); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "malformed request"})
-			c.Abort()
-			return
-		}
+		token := c.GetHeader("Token")
 
-		if authenticator.Token == "" {
-			c.JSON(http.StatusUnauthorized, map[string]string{
+		if token == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
 				"error": "missing token",
 			})
-			c.Abort()
 			return
 		}
 
-		authenticated, err := authenticationRequest(AuthenticationServiceUrl, authenticator.Token)
+		authenticated, err := authenticationRequest(authenticationServiceRoute, token)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, map[string]string{
+			c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
 				"error": err.Error(),
 			})
-			c.Abort()
 			return
 		}
 
 		if !authenticated {
-			c.JSON(http.StatusUnauthorized, map[string]string{
+			c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
 				"error": "invalid token",
 			})
-			c.Abort()
 			return
 		}
 
@@ -51,18 +40,15 @@ func Authenticate(AuthenticationServiceUrl string) gin.HandlerFunc {
 	}
 }
 
-func authenticationRequest(url string, token string) (bool, error) {
+func authenticationRequest(authenticationServiceRoute external_router.ExternalRoute, token string) (bool, error) {
 	client := &http.Client{}
 
-	data := map[string]string{"token": token}
-	jsonData, err := json.Marshal(data)
-
-	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest(authenticationServiceRoute.Method, authenticationServiceRoute.Url, nil)
 	if err != nil {
 		return false, err
 	}
 
-	request.Header.Add("content-type", "application/json")
+	request.Header.Add("Token", token)
 
 	response, err := client.Do(request)
 	if err != nil {

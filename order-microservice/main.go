@@ -2,7 +2,7 @@ package main
 
 import (
 	"order-microservice/pkg/database"
-	"order-microservice/pkg/routes"
+	"order-microservice/pkg/routes/internal_router"
 	"os"
 )
 
@@ -15,7 +15,6 @@ func main() {
 
 	databaseConnection := databaseFactory.GetConnection()
 
-	var router routes.Router
-	router = router.NewRouter(databaseConnection)
-	router.RegisterRoutes()
+	router := internal_router.NewInternalRouter()
+	router.RegisterRoutes(databaseConnection)
 }

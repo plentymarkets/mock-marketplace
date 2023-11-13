@@ -7,8 +7,8 @@ import (
 
 type Order struct {
 	ID              uint      `gorm:"primaryKey"`
-	CustomerID      int       `gorm:"type:int"`
-	SellerID        int       `gorm:"type:int"`
+	CustomerID      uint      `gorm:"type:uint"`
+	SellerID        uint      `gorm:"type:uint"`
 	OrderNumber     string    `gorm:"type:varchar(255)"`
 	OrderDate       time.Time `gorm:"type:datetime"`
 	Status          string    `gorm:"type:varchar(50)"`

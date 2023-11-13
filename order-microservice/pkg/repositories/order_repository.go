@@ -86,10 +86,14 @@ func (OrderRepository OrderRepository) FindOneByField(field string, value string
 	var order models.Order
 	OrderRepository.Database.Preload("OrderItems")
 
-	OrderRepository.Database.Where(field+" = ?", value).First(&order)
+	transaction := OrderRepository.Database.Where(field+" = ?", value).First(&order)
 
-	if OrderRepository.Database.Error != nil {
+	if transaction.Error != nil {
 		return nil, OrderRepository.Database.Error
+	}
+
+	if transaction.RowsAffected == 0 {
+		return nil, nil
 	}
 
 	return &order, nil
@@ -174,6 +178,55 @@ func (OrderRepository OrderRepository) FindByFields(fields map[string]string, of
 	}
 
 	OrderRepository.Database.Find(&orders)
+
+	if OrderRepository.Database.Error != nil {
+		return nil, OrderRepository.Database.Error
+	}
+
+	return &orders, nil
+}
+
+func (OrderRepository OrderRepository) Create(order *models.Order) error {
+	transaction := OrderRepository.Database.Create(&order)
+
+	if transaction.Error != nil {
+		return transaction.Error
+	}
+
+	return nil
+}
+
+func (OrderRepository OrderRepository) Update(order *models.Order) error {
+	transaction := OrderRepository.Database.Save(&order)
+
+	if transaction.Error != nil {
+		return transaction.Error
+	}
+
+	return nil
+}
+
+func (OrderRepository OrderRepository) FindByTimeRange(field string, start string, end string, offset *int, limit *int) (*[]models.Order, error) {
+	var orders []models.Order
+	OrderRepository.Database.Preload("OrderItems")
+
+	if offset != nil {
+		OrderRepository.Database = OrderRepository.Database.Offset(*offset)
+
+		if OrderRepository.Database.Error != nil {
+			return nil, OrderRepository.Database.Error
+		}
+	}
+
+	if limit != nil {
+		OrderRepository.Database = OrderRepository.Database.Limit(*limit)
+
+		if OrderRepository.Database.Error != nil {
+			return nil, OrderRepository.Database.Error
+		}
+	}
+
+	OrderRepository.Database.Where(field+"BETWEEN ? AND ?", start, end).Find(&orders)
 
 	if OrderRepository.Database.Error != nil {
 		return nil, OrderRepository.Database.Error
