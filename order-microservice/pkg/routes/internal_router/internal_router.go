@@ -1,6 +1,7 @@
 package internal_router
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"order-microservice/pkg/handlers/order-handlers"
@@ -22,7 +23,12 @@ func NewInternalRouter() InternalRouter {
 func (internalRouter InternalRouter) RegisterRoutes(database *gorm.DB) {
 	internalRouter.RegisterOrderRoutes(database)
 
-	err := internalRouter.Engine.Run(os.Getenv("GIN_PORT"))
+	address := fmt.Sprintf("%s:%s",
+		os.Getenv("GIN_HOST"),
+		os.Getenv("GIN_PORT"),
+	)
+
+	err := internalRouter.Engine.Run(address)
 
 	if err != nil {
 		panic(err.Error())

@@ -23,8 +23,8 @@ func main() {
 	router.Variant(con, engine)
 
 	address := fmt.Sprintf("%s:%s",
-		os.Getenv("HOST"),
-		os.Getenv("PRODUCT_PORT"),
+		os.Getenv("GIN_HOST"),
+		os.Getenv("GIN_PORT"),
 	)
 	err := engine.Run(address)
 
