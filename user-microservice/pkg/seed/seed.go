@@ -21,6 +21,7 @@ func Seed(database *gorm.DB) error {
 
 func generateUser() models.User {
 	user := models.User{
+		SellerID: 1,
 		Email:    "john.doe@example.com",
 		Password: "password",
 	}

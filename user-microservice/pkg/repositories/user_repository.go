@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"gorm.io/gorm"
-	"log"
 	"user-microservice/pkg/models"
 )
 
@@ -16,28 +15,177 @@ func NewRepository(databaseConnection *gorm.DB) UserRepository {
 	return repository
 }
 
-func (repository *UserRepository) GetUser(id int) models.User {
-	var user models.User
-	repository.Database.First(&user, id)
-	return user
-}
+func (repository *UserRepository) FindAll(offset *int, limit *int) (*[]models.User, error) {
 
-func (repository *UserRepository) UpdateUser(user models.User) {
-	repository.Database.Save(&user)
-}
+	if offset != nil {
+		repository.Database = repository.Database.Offset(*offset)
 
-func (repository *UserRepository) DeleteUser(user models.User) {
-	repository.Database.Delete(&user)
-}
-
-func (repository *UserRepository) GetUserByEmail(email string) models.User {
-	var user models.User
-	tx := repository.Database.Where("email = ?", email).First(&user)
-
-	if tx.Error != nil {
-		log.Println(tx.Error)
-		return models.User{}
+		if repository.Database.Error != nil {
+			return nil, repository.Database.Error
+		}
 	}
 
-	return user
+	if limit != nil {
+		repository.Database = repository.Database.Limit(*limit)
+
+		if repository.Database.Error != nil {
+			return nil, repository.Database.Error
+		}
+	}
+
+	var offers []models.User
+	repository.Database.Find(&offers)
+
+	if repository.Database.Error != nil {
+		return nil, repository.Database.Error
+	}
+
+	return &offers, nil
+}
+
+func (repository *UserRepository) FindById(id int, offset *int, limit *int) (*models.User, error) {
+	var offer models.User
+
+	if offset != nil {
+		repository.Database = repository.Database.Offset(*offset)
+
+		if repository.Database.Error != nil {
+			return nil, repository.Database.Error
+		}
+	}
+
+	if limit != nil {
+		repository.Database = repository.Database.Limit(*limit)
+
+		if repository.Database.Error != nil {
+			return nil, repository.Database.Error
+		}
+	}
+
+	repository.Database.Find(&offer, id)
+
+	return &offer, nil
+}
+
+func (repository *UserRepository) FindOneById(id int) (*models.User, error) {
+
+	var offer models.User
+	repository.Database.First(&offer, id)
+
+	if repository.Database.Error != nil {
+		return nil, repository.Database.Error
+	}
+
+	return &offer, nil
+}
+
+func (repository *UserRepository) FindOneByField(field string, value string) (*models.User, error) {
+	var offer models.User
+
+	repository.Database.Where(field+" = ?", value).First(&offer)
+
+	if repository.Database.Error != nil {
+		return nil, repository.Database.Error
+	}
+
+	return &offer, nil
+}
+
+func (repository *UserRepository) FindOneByFields(fields map[string]string) (*models.User, error) {
+	var offer models.User
+
+	for key, val := range fields {
+		repository.Database = repository.Database.Where(key+" = ?", val)
+
+		if repository.Database.Error != nil {
+			return nil, repository.Database.Error
+		}
+	}
+
+	repository.Database.First(&offer)
+
+	if repository.Database.Error != nil {
+		return nil, repository.Database.Error
+	}
+
+	return &offer, nil
+}
+
+func (repository *UserRepository) FindByField(field string, value string, offset *int, limit *int) (*[]models.User, error) {
+	var offers []models.User
+
+	if offset != nil {
+		repository.Database = repository.Database.Offset(*offset)
+
+		if repository.Database.Error != nil {
+			return nil, repository.Database.Error
+		}
+	}
+
+	if limit != nil {
+		repository.Database = repository.Database.Limit(*limit)
+
+		if repository.Database.Error != nil {
+			return nil, repository.Database.Error
+		}
+	}
+
+	repository.Database.Where(field+" = ?", value).Find(&offers)
+
+	if repository.Database.Error != nil {
+		return nil, repository.Database.Error
+	}
+
+	return &offers, nil
+}
+
+func (repository *UserRepository) FindByFields(fields map[string]string, offset *int, limit *int) (*[]models.User, error) {
+	var offers []models.User
+
+	if offset != nil {
+		repository.Database = repository.Database.Offset(*offset)
+
+		if repository.Database.Error != nil {
+			return nil, repository.Database.Error
+		}
+	}
+
+	if limit != nil {
+		repository.Database = repository.Database.Limit(*limit)
+
+		if repository.Database.Error != nil {
+			return nil, repository.Database.Error
+		}
+	}
+
+	for key, val := range fields {
+		repository.Database = repository.Database.Where(key+" = ?", val)
+
+		if repository.Database.Error != nil {
+			return nil, repository.Database.Error
+		}
+	}
+
+	repository.Database.Find(&offers)
+
+	if repository.Database.Error != nil {
+		return nil, repository.Database.Error
+	}
+
+	return &offers, nil
+}
+
+func (repository *UserRepository) Create(user *models.User) (*models.User, error) {
+	transaction := repository.Database.Create(&user)
+	return user, transaction.Error
+}
+
+func (repository *UserRepository) UpdateUser(user *models.User) (*models.User, error) {
+	transaction := repository.Database.Save(&user)
+	return user, transaction.Error
+}
+
+func (repository *UserRepository) DeleteUser(user *models.User) (*models.User, error) {
+	transaction := repository.Database.Delete(&user)
+	return user, transaction.Error
 }

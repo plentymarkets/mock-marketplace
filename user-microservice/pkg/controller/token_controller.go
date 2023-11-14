@@ -55,7 +55,14 @@ func RetrieveToken(databaseConnection *gorm.DB) gin.HandlerFunc {
 		}
 
 		userRepository := repositories.NewRepository(databaseConnection)
-		user := userRepository.GetUserByEmail(credentials.Email)
+		user, err := userRepository.FindOneByField("email", credentials.Email)
+
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, map[string]string{
+				"error": "invalid credentials",
+			})
+			return
+		}
 
 		if user.Password != credentials.Password {
 			c.JSON(http.StatusUnauthorized, map[string]string{
@@ -64,7 +71,7 @@ func RetrieveToken(databaseConnection *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if tokenIsntExpired(user) {
+		if tokenIsNotExpired(user) {
 			c.JSON(http.StatusOK, map[string]string{
 				"token": user.Token,
 			})
@@ -92,6 +99,6 @@ func RetrieveToken(databaseConnection *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-func tokenIsntExpired(user models.User) bool {
+func tokenIsNotExpired(user *models.User) bool {
 	return time.Now().Unix() < user.TokenExpiration.Unix() && !user.TokenExpiration.IsZero()
 }

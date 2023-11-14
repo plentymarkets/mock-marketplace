@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"gorm.io/gorm"
 	"net/http"
 	"os"
+	"strconv"
+	"user-microservice/pkg/repositories"
 )
 
-func Validate() gin.HandlerFunc {
+func Validate(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("token")
 
@@ -20,14 +23,7 @@ func Validate() gin.HandlerFunc {
 			return
 		}
 
-		authentication, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
-			_, ok := t.Method.(*jwt.SigningMethodHMAC)
-			if !ok {
-				return nil, errors.New("invalid token")
-			}
-
-			return []byte(os.Getenv("JWT_SECRET")), nil
-		})
+		authentication, err := parseJwt(token)
 
 		if err != nil {
 			fmt.Println(err.Error())
@@ -44,8 +40,30 @@ func Validate() gin.HandlerFunc {
 			return
 		}
 
+		userRepository := repositories.NewRepository(databaseConnection)
+		user, err := userRepository.FindOneByField("token", token)
+
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
+				"error": "token doesn't belong to any user",
+			})
+			return
+		}
+
 		c.JSON(http.StatusOK, map[string]string{
-			"message": "valid token",
+			"sellerId": strconv.Itoa(user.SellerID),
 		})
 	}
+}
+
+func parseJwt(token string) (*jwt.Token, error) {
+	authentication, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		_, ok := t.Method.(*jwt.SigningMethodHMAC)
+		if !ok {
+			return nil, errors.New("invalid token")
+		}
+
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+	return authentication, err
 }

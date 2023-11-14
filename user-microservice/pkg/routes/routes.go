@@ -13,12 +13,12 @@ func RegisterRoutes(databaseConnection *gorm.DB) {
 	router := gin.Default()
 
 	api := router.Group("/user")
-	api.GET("/validation", controller.Validate())
+	api.GET("/validation", controller.Validate(databaseConnection))
 	api.POST("/token", controller.RetrieveToken(databaseConnection))
 
 	address := fmt.Sprintf("%s:%s",
-		os.Getenv("HOST"),
-		os.Getenv("AUTH_PORT"),
+		os.Getenv("GIN_HOST"),
+		os.Getenv("GIN_PORT"),
 	)
 	err := router.Run(address)
 
