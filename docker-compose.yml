@@ -6,7 +6,7 @@ services:
     image: mariadb:latest
     container_name: user_microservice_database
     env_file:
-      - user-microservice/.env
+      - user-microservice/.env.dev
     ports:
       - "3301:3306"
     networks:
@@ -18,7 +18,7 @@ services:
     image: mariadb:latest
     container_name: order_microservice_database
     env_file:
-      - order-microservice/.env
+      - order-microservice/.env.dev
     ports:
       - "3303:3306"
     networks:
@@ -30,7 +30,7 @@ services:
     image: mariadb:latest
     container_name: product_management_database
     env_file:
-      - product-management/.env
+      - product-management/.env.dev
     ports:
       - "3304:3306"
     networks:
@@ -42,7 +42,7 @@ services:
     image: mariadb:latest
     container_name: offer-microservice_database
     env_file:
-      - offer-microservice/.env
+      - offer-microservice/.env.dev
     ports:
       - "3305:3306"
     networks:
@@ -57,7 +57,7 @@ services:
     ports:
       - "3001:3001"
     env_file:
-      - user-microservice/.env
+      - user-microservice/.env.dev
     networks:
       - my_network
     depends_on:
@@ -71,7 +71,7 @@ services:
     ports:
       - "3003:3003"
     env_file:
-      - order-microservice/.env
+      - order-microservice/.env.dev
     networks:
       - my_network
     depends_on:
@@ -85,7 +85,7 @@ services:
     ports:
       - "3004:3004"
     env_file:
-      - product-management/.env
+      - product-management/.env.dev
     networks:
       - my_network
     depends_on:
@@ -99,7 +99,7 @@ services:
     ports:
       - "3002:3002"
     env_file:
-      - offer-microservice/.env
+      - offer-microservice/.env.dev
     networks:
       - my_network
     depends_on:
