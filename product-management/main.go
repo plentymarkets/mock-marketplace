@@ -7,9 +7,12 @@ import (
 	"os"
 	"product-management/pkg/database"
 	"product-management/pkg/router"
+	"product-management/pkg/utils/env-handler"
 )
 
 func main() {
+	env_handler.LoadEnvironment()
+
 	engine := gin.Default()
 
 	dsn := database.GetMariaDBDSN()

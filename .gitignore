@@ -1,2 +1,8 @@
-.idea
-.env
+.idea/
+.run/
+offer-microservice/.env.dev
+order-microservice/.env.dev
+product-management/.env.dev
+user-microservice/.env.dev
+/.env
+
