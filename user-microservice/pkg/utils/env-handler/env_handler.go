@@ -1,8 +1,9 @@
 package env_handler
 
 import (
-	"github.com/joho/godotenv"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 func LoadEnvironment() {
