@@ -12,16 +12,15 @@ func GenerateDataSourceName() string {
 	dbUser := url.QueryEscape(os.Getenv("MYSQL_USER"))
 	dbPass := url.QueryEscape(os.Getenv("MYSQL_PASSWORD"))
 	dbName := url.QueryEscape(os.Getenv("MYSQL_DATABASE"))
-	dbTimezone := url.QueryEscape(os.Getenv("MYSQL_TIMEZONE"))
 
-	dataSourceName := generate(dbUser, dbPass, dbHost, dbPort, dbName, dbTimezone)
+	dataSourceName := generate(dbUser, dbPass, dbHost, dbPort, dbName)
 
 	return dataSourceName
 }
 
-func generate(dbUser string, dbPass string, dbHost string, dbPort string, dbName string, dbTimezone string) string {
+func generate(dbUser string, dbPass string, dbHost string, dbPort string, dbName string) string {
 	return fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=%s",
-		dbUser, dbPass, dbHost, dbPort, dbName, dbTimezone,
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True",
+		dbUser, dbPass, dbHost, dbPort, dbName,
 	)
 }

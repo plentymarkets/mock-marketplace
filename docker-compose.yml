@@ -2,13 +2,11 @@ version: '3'
 
 services:
 
-  #   Database service
   user-microservice-database:
     image: mariadb:latest
     container_name: user_microservice_database
     env_file:
-      - user-microservice/.env
-#      - /.env
+      - user-microservice/.env.prod
     ports:
       - "3301:3306"
     networks:
@@ -16,12 +14,23 @@ services:
     volumes:
       - user-data:/var/lib/mysql
 
+  offer-microservice-database:
+    image: mariadb:latest
+    container_name: offer-microservice_database
+    env_file:
+      - offer-microservice/.env.prod
+    ports:
+      - "3302:3306"
+    networks:
+      - my_network
+    volumes:
+      - offer-data:/var/lib/mysql
+
   order-microservice-database:
     image: mariadb:latest
     container_name: order_microservice_database
     env_file:
-      - order-microservice/.env
-#      - /.env
+      - order-microservice/.env.prod
     ports:
       - "3303:3306"
     networks:
@@ -33,8 +42,7 @@ services:
     image: mariadb:latest
     container_name: product_management_database
     env_file:
-      - product-management/.env
-#      - /.env
+      - product-management/.env.prod
     ports:
       - "3304:3306"
     networks:
@@ -42,20 +50,6 @@ services:
     volumes:
       - product-data:/var/lib/mysql
 
-  offer-microservice-database:
-    image: mariadb:latest
-    container_name: offer-microservice_database
-    env_file:
-      - offer-microservice/.env
-#      - /.env
-    ports:
-      - "3305:3306"
-    networks:
-      - my_network
-    volumes:
-      - offer-data:/var/lib/mysql
-
-  # Microservice 1
   user-microservice:
     build:
       context: user-microservice
@@ -63,15 +57,27 @@ services:
     ports:
       - "3001:3001"
     env_file:
-      - user-microservice/.env
-#      - /.env
+      - user-microservice/.env.prod
     networks:
       - my_network
     depends_on:
       - user-microservice-database
     restart: on-failure
 
-  # Microservice 3
+  offer-microservice:
+    build:
+      context: ./offer-microservice
+    container_name: offer-microservice
+    ports:
+      - "3002:3002"
+    env_file:
+      - offer-microservice/.env.prod
+    networks:
+      - my_network
+    depends_on:
+      - offer-microservice-database
+    restart: on-failure
+
   order-microservice:
     build:
       context: order-microservice
@@ -79,15 +85,13 @@ services:
     ports:
       - "3003:3003"
     env_file:
-      - order-microservice/.env
-#      - /.env
+      - order-microservice/.env.prod
     networks:
       - my_network
     depends_on:
       - order-microservice-database
     restart: on-failure
 
-  # Microservice 4
   product-management:
     build:
       context: ./product-management
@@ -95,28 +99,11 @@ services:
     ports:
       - "3004:3004"
     env_file:
-      - product-management/.env
-#      - /.env
+      - product-management/.env.prod
     networks:
       - my_network
     depends_on:
       - product-management-database
-    restart: on-failure
-
-  # Microservice 5
-  offer-microservice:
-    build:
-      context: ./offer-microservice
-    container_name: offer-microservice
-    ports:
-      - "3005:3005"
-    env_file:
-      - offer-microservice/.env
-#      - /.env
-    networks:
-      - my_network
-    depends_on:
-      - offer-microservice-database
     restart: on-failure
 
 networks:

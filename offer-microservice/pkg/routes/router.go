@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"offer-microservice/pkg/controllers"
@@ -29,7 +30,12 @@ func (router Router) NewRouter(databaseConnection *gorm.DB) Router {
 func (router Router) RegisterRoutes() {
 	router.RegisterOfferRoutes()
 
-	err := router.engine.Run(os.Getenv("GIN_PORT"))
+	address := fmt.Sprintf("%s:%s",
+		os.Getenv("GIN_HOST"),
+		os.Getenv("GIN_PORT"),
+	)
+
+	err := router.engine.Run(address)
 
 	if err != nil {
 		panic(err.Error())
