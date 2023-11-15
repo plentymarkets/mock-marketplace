@@ -1,8 +1,8 @@
+# ignore files and folders
 .idea/
 .run/
-offer-microservice/.env.dev
-order-microservice/.env.dev
-product-management/.env.dev
-user-microservice/.env.dev
-/.env
+*.env.dev
+*.env.prod
 
+# exclude all .env.dist files
+!.env.dist
