@@ -1,15 +1,20 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"user-microservice/pkg/database"
 	"user-microservice/pkg/routes"
-	"user-microservice/pkg/utils/env-handler"
 )
 
 func main() {
-	env_handler.LoadEnvironment()
+
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env.dev file")
+	}
 
 	databaseFactory, err := database.CreateDatabase(os.Getenv("DATABASE_DRIVER"))
 
