@@ -46,7 +46,7 @@ func Authenticate(username string, password string) (*http.Response, error) {
 	}
 
 	authURL := fmt.Sprintf("%s:%s",
-		os.Getenv("AUTH_URL"),
+		os.Getenv("AUTHENTICATOR_MICROSERVICE_URL"),
 		"/user/token",
 	)
 
@@ -68,7 +68,7 @@ func ValidateToken(token string) (*http.Response, error) {
 	}
 
 	authURL := fmt.Sprintf("%s:%s",
-		os.Getenv("AUTH_URL"),
+		os.Getenv("AUTHENTICATOR_MICROSERVICE_URL"),
 		"/user/validation",
 	)
 
