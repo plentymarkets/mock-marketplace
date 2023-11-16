@@ -3,7 +3,7 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"order-microservice/pkg/routes/external_router"
+	"order-microservice/pkg/routes/external-router"
 )
 
 func Authenticate() gin.HandlerFunc {

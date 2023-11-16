@@ -1,10 +1,8 @@
 package providers
 
 import (
-	"encoding/json"
-	"io"
-	"net/http"
-	"order-microservice/pkg/routes/external_router"
+	"fmt"
+	"order-microservice/pkg/routes/external-router"
 )
 
 type Offer struct {
@@ -15,33 +13,24 @@ type Offer struct {
 	Quantity int     `json:"quantity"`
 }
 
-func FetchOffer(route external_router.ExternalRoute, token string) (*Offer, error) {
-	client := &http.Client{}
+func NewOfferProvider() *Offer {
+	return &Offer{}
+}
 
-	req, err := http.NewRequest(route.Method, route.Url, nil)
+func (offer Offer) Provide(route external_router.ExternalRoute, token string) (*Providable, error) {
+	fetchRequest, err := FetchRequest(route, token)
+
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not retrieve offer: %s", err.Error())
 	}
 
-	req.Header.Add("token", token)
+	return fetchRequest, err
+}
 
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
+func (offer Offer) Validate() error {
+	if offer.ID == 0 {
+		return fmt.Errorf("offer not found")
 	}
 
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var offer Offer
-	err = json.Unmarshal(body, &offer)
-	if err != nil {
-		return nil, err
-	}
-
-	return &offer, nil
+	return nil
 }

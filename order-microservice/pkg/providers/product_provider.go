@@ -1,10 +1,8 @@
 package providers
 
 import (
-	"encoding/json"
-	"io"
-	"net/http"
-	"order-microservice/pkg/routes/external_router"
+	"fmt"
+	"order-microservice/pkg/routes/external-router"
 )
 
 type Product struct {
@@ -30,33 +28,20 @@ type Variant struct {
 	Deleted    bool   `json:"deleted"`
 }
 
-func FetchProduct(route external_router.ExternalRoute, token string) (*Product, error) {
-	client := &http.Client{}
+func NewProductProvider() *Product {
+	return &Product{}
+}
 
-	req, err := http.NewRequest("GET", route.Url, nil)
+func (product Product) Provide(route external_router.ExternalRoute, token string) (*Providable, error) {
+	fetchRequest, err := FetchRequest(route, token)
+
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not retrieve product: %s", err.Error())
 	}
 
-	req.Header.Add("token", token)
+	return fetchRequest, err
+}
 
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var product Product
-	err = json.Unmarshal(body, &product)
-	if err != nil {
-		return nil, err
-	}
-
-	return &product, nil
+func (product Product) Validate() error {
+	return nil
 }

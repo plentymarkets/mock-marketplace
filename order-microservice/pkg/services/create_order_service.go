@@ -7,7 +7,7 @@ import (
 	"order-microservice/pkg/models"
 	"order-microservice/pkg/providers"
 	"order-microservice/pkg/repositories"
-	"order-microservice/pkg/routes/external_router"
+	"order-microservice/pkg/routes/external-router"
 	"order-microservice/pkg/utils/http-error"
 	"time"
 )

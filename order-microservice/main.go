@@ -2,7 +2,7 @@ package main
 
 import (
 	"order-microservice/pkg/database"
-	"order-microservice/pkg/routes/internal_router"
+	"order-microservice/pkg/routes/internal-router"
 	"order-microservice/pkg/utils/env-handler"
 	"os"
 )
