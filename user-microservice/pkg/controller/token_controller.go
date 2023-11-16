@@ -21,7 +21,7 @@ func RetrieveToken(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var credentials Credentials
 
-		if err := c.ShouldBindJSON(&credentials); err != nil {
+		if err := c.BindJSON(&credentials); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "malformed request"})
 			return
 		}
