@@ -40,9 +40,9 @@ func (controller *OfferController) CreateOffer(databaseConnection *gorm.DB) gin.
 	}
 }
 
-func (controller *OfferController) GetOffers(databaseConnection *gorm.DB) gin.HandlerFunc {
+func (controller *OfferController) GetSellersOffers(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sellerId := c.Param("sellerId")
+		sellerId := c.MustGet("sellerId").(string)
 
 		page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 
@@ -82,11 +82,49 @@ func (controller *OfferController) GetOffers(databaseConnection *gorm.DB) gin.Ha
 	}
 }
 
-func (controller *OfferController) GetOfferById(databaseConnection *gorm.DB) gin.HandlerFunc {
+func (controller *OfferController) GetSellersOfferById(databaseConnection *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		offerId, err := strconv.Atoi(c.Param("offerId"))
+		offerId := c.Param("offerId")
+		if offerId == "0" {
+			c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid offer id",
+			})
+			c.Abort()
+			return
+		}
+
+		SellerId := c.MustGet("sellerId").(string)
+		if SellerId == "0" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid seller id",
+			})
+			return
+		}
+
+		offerRepository := repositories.NewOfferRepository(databaseConnection)
+		fields := map[string]string{
+			"seller_id": SellerId,
+			"id":        offerId,
+		}
+		offer, err := offerRepository.FindOneByFields(fields)
 
 		if err != nil {
+			c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Could not retrieve offer",
+			})
+			c.Abort()
+			return
+		}
+
+		c.JSON(http.StatusOK, offer)
+		c.Done()
+	}
+}
+
+func (controller *OfferController) GetOfferById(databaseConnection *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		offerId := c.Param("offerId")
+		if offerId == "0" {
 			c.JSON(http.StatusBadRequest, map[string]string{
 				"error": "Invalid offer id",
 			})
@@ -95,7 +133,7 @@ func (controller *OfferController) GetOfferById(databaseConnection *gorm.DB) gin
 		}
 
 		offerRepository := repositories.NewOfferRepository(databaseConnection)
-		offer, err := offerRepository.FindOneById(offerId)
+		offer, err := offerRepository.FindOneByField("id", offerId)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{

@@ -7,7 +7,7 @@ import (
 type Offer struct {
 	ID       uint    `gorm:"primaryKey"`
 	SellerID int     `gorm:"type:int"`
-	Gtin     int     `gorm:"type:int"` // Could be used as a primary ID
+	Gtin     int     `gorm:"type:int"`
 	Price    float64 `gorm:"type:decimal(10,2)"`
 	Quantity int     `gorm:"type:int"`
 }
