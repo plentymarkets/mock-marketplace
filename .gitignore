@@ -1,1 +1,9 @@
-.idea
+# ignore files and folders
+.idea/
+.run/
+.env/
+*.env.dev
+*.env.prod
+
+# exclude all .env.dist files
+!.env.dist
