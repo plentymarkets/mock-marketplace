@@ -1,62 +1,115 @@
 version: '3'
+
 services:
-  auth-database:
+  user-microservice-database:
     image: mariadb:latest
-    container_name: auth_database
-    environment:
-      DATABASE_DRIVER: mariadb
-      MYSQL_DATABASE: authdb
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: mypassword
-      MYSQL_ROOT_PASSWORD: myrootpassword
-      MYSQL_TCP_PORT: 5432
-      MYSQL_DSN: "myuser:mypassword@tcp(localhost:5432)/authdb"
+    container_name: user_microservice_database
+    env_file:
+      - user-microservice/.env.prod
     ports:
-      - "5432:5432"
-    volumes:
-      - ./database/auth/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - "3301:3306"
     networks:
       - my_network
+    volumes:
+      - user-data:/var/lib/mysql
 
-  # Microservice 1
-  auth:
+  offer-microservice-database:
+    image: mariadb:latest
+    container_name: offer-microservice_database
+    env_file:
+      - offer-microservice/.env.prod
+    ports:
+      - "3302:3306"
+    networks:
+      - my_network
+    volumes:
+      - offer-data:/var/lib/mysql
+
+  order-microservice-database:
+    image: mariadb:latest
+    container_name: order_microservice_database
+    env_file:
+      - order-microservice/.env.prod
+    ports:
+      - "3303:3306"
+    networks:
+      - my_network
+    volumes:
+      - order-data:/var/lib/mysql
+
+  product-management-database:
+    image: mariadb:latest
+    container_name: product_management_database
+    env_file:
+      - product-management/.env.prod
+    ports:
+      - "3304:3306"
+    networks:
+      - my_network
+    volumes:
+      - product-data:/var/lib/mysql
+
+  user-microservice:
     build:
-      context: ./auth
-    container_name: auth
+      context: user-microservice
+    container_name: user-microservice
     ports:
       - "3001:3001"
+    env_file:
+      - user-microservice/.env.prod
     networks:
       - my_network
+    depends_on:
+      - user-microservice-database
+    restart: on-failure
 
-  # Microservice 2
-#  offer-management:
-#    build:
-#      context: ./offer-management
-#    container_name: offer-management
-#    ports:
-#      - "3002:3002"
-#    networks:
-#      - my_network
+  offer-microservice:
+    build:
+      context: ./offer-microservice
+    container_name: offer-microservice
+    ports:
+      - "3002:3002"
+    env_file:
+      - offer-microservice/.env.prod
+    networks:
+      - my_network
+    depends_on:
+      - offer-microservice-database
+    restart: on-failure
 
-  # Microservice 3
-#  order-management:
-#    build:
-#      context: ./order-management
-#    container_name: order-management
-#    ports:
-#      - "3003:3003"
-#    networks:
-#      - my_network
+  order-microservice:
+    build:
+      context: order-microservice
+    container_name: order-microservice
+    ports:
+      - "3003:3003"
+    env_file:
+      - order-microservice/.env.prod
+    networks:
+      - my_network
+    depends_on:
+      - order-microservice-database
+    restart: on-failure
 
-  # Microservice 3
-#  product-management:
-#    build:
-#      context: ./product-management
-#    container_name: product-management
-#    ports:
-#      - "3004:3004"
-#    networks:
-#      - my_network
+  product-management:
+    build:
+      context: ./product-management
+    container_name: product-management
+    ports:
+      - "3004:3004"
+    env_file:
+      - product-management/.env.prod
+    networks:
+      - my_network
+    depends_on:
+      - product-management-database
+    restart: on-failure
 
 networks:
   my_network:
+
+volumes:
+  user-data:
+  offer-data:
+  order-data:
+  product-data:
