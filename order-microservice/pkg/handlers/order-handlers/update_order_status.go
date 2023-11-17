@@ -23,13 +23,13 @@ func UpdateOrderStatus(database *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		err = update_status.UpdateStatus(orderRepository, result.Order, request)
+		order, err := update_status.UpdateStatus(orderRepository, result.Order, request)
 		if err != nil {
 			context.AbortWithStatusJSON(err.Status, err.Message)
 			return
 		}
 
-		context.JSON(http.StatusOK, map[string]string{})
+		context.JSON(http.StatusOK, order)
 		context.Done()
 	}
 }

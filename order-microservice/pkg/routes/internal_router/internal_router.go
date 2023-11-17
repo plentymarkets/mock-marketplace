@@ -37,7 +37,10 @@ func (internalRouter InternalRouter) RegisterRoutes(database *gorm.DB) {
 
 func (internalRouter InternalRouter) RegisterOrderRoutes(database *gorm.DB) {
 	routes := internalRouter.Engine.Group("/orders").Use(middlewares.Authenticate())
-	routes.GET("/:sellerId", order_handlers.GetOrders(database))
+	routes.GET("/", order_handlers.GetOrders(database))
+	routes.GET("/:orderId", order_handlers.GetOrderById(database))
 	routes.PATCH("/status", order_handlers.UpdateOrderStatus(database))
-	routes.POST("/", order_handlers.CreateOrder(database))
+
+	internalRoutes := internalRouter.Engine.Group("/internal/orders").Use(middlewares.AuthenticateApiKey())
+	internalRoutes.POST("/", order_handlers.CreateOrder(database))
 }

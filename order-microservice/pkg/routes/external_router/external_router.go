@@ -19,8 +19,7 @@ func NewExternalRouter() ExternalRouter {
 	externalRouter.routes = make(map[string]ExternalRoute)
 
 	externalRouter.AddRoute("validate-token", os.Getenv("AUTHENTICATOR_MICROSERVICE_URL")+"/user/validation", "GET")
-	externalRouter.AddRoute("get-offer-by-id", os.Getenv("OFFER_MICROSERVICE_URL")+"/offers/{offerId}", "GET")
-	externalRouter.AddRoute("get-product-by-gtin", os.Getenv("PRODUCT_MICROSERVICE_URL")+"/product/{gtin}", "GET")
+	externalRouter.AddRoute("get-offer-by-id", os.Getenv("OFFER_MICROSERVICE_URL")+"/internal/offers/{offerId}", "GET")
 
 	return externalRouter
 }

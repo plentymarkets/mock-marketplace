@@ -19,7 +19,7 @@ const (
 	cancelled = "cancelled"
 )
 
-func Create(repository repositories.OrderRepository, externalRouter external_router.ExternalRouter, request *Request, token string) *http_error.HttpError {
+func Create(repository repositories.OrderRepository, externalRouter external_router.ExternalRouter, request *Request, apiKey string) *http_error.HttpError {
 	customerResult, httpError := FetchCustomer()
 	if httpError != nil {
 		return httpError
@@ -28,12 +28,7 @@ func Create(repository repositories.OrderRepository, externalRouter external_rou
 	orders := make(map[uint]*models.Order)
 
 	for _, id := range request.OfferIds {
-		offerResult, httpError := FetchOffer(externalRouter, id, token)
-		if httpError != nil {
-			return httpError
-		}
-
-		productResult, httpError := FetchProduct(externalRouter, offerResult.Offer.Gtin, token)
+		offerResult, httpError := FetchOffer(externalRouter, id, apiKey)
 		if httpError != nil {
 			return httpError
 		}
@@ -43,7 +38,7 @@ func Create(repository repositories.OrderRepository, externalRouter external_rou
 			addOrderData(orders[offerResult.Offer.SellerID], customerResult.Customer, offerResult.Offer)
 		}
 
-		addOrderItemData(orders[offerResult.Offer.SellerID], offerResult.Offer, productResult.Product)
+		addOrderItemData(orders[offerResult.Offer.SellerID], offerResult.Offer)
 		recalculateTotalSum(orders[offerResult.Offer.SellerID], offerResult.Offer)
 	}
 
@@ -66,12 +61,12 @@ func recalculateTotalSum(order *models.Order, offer providers.Offer) {
 	order.TotalSum += offer.Price
 }
 
-func addOrderItemData(order *models.Order, offer providers.Offer, product providers.Product) {
+func addOrderItemData(order *models.Order, offer providers.Offer) {
 	var orderItem models.OrderItem
 
 	orderItem.OrderID = order.ID
 	orderItem.OfferID = offer.ID
-	orderItem.GTIN = product.GTIN
+	orderItem.GTIN = offer.GTIN
 	orderItem.Price = offer.Price
 	orderItem.Quantity = 1      // placeholder as there is no real quantity
 	orderItem.SKU = "123456789" // placeholder as there is no real SKU
@@ -91,7 +86,7 @@ func addOrderData(order *models.Order, customer providers.Customer, offer provid
 
 func generateOrderNumber(order *models.Order, repository repositories.OrderRepository) error {
 	rand.New(rand.NewSource(time.Now().UnixNano()))
-	randomNumber := rand.Intn(10000) // generates a random integer up to 10000
+	randomNumber := rand.Intn(10000)
 	timestamp := time.Now().Unix()
 	orderNumber := fmt.Sprintf("%d-%d", timestamp, randomNumber)
 

@@ -12,9 +12,9 @@ type OfferResult struct {
 	Offer providers.Offer
 }
 
-func FetchOffer(externalRouter external_router.ExternalRouter, id int, token string) (*OfferResult, *http_error.HttpError) {
+func FetchOffer(externalRouter external_router.ExternalRouter, id int, apiKey string) (*OfferResult, *http_error.HttpError) {
 	url := externalRouter.GetRoute("get-offer-by-id", map[string]string{"offerId": fmt.Sprintf("%d", id)})
-	offer, err := providers.FetchOffer(url, token)
+	offer, err := providers.FetchOffer(url, apiKey)
 
 	if err != nil {
 		return nil, &http_error.HttpError{Status: http.StatusInternalServerError, Message: map[string]string{"error": fmt.Sprintf("could not retrieve offer: %s", err.Error())}}
