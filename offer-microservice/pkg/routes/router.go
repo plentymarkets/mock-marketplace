@@ -45,7 +45,11 @@ func (router Router) RegisterRoutes() {
 func (router Router) RegisterOfferRoutes() {
 	offerController := controllers.OfferController{}
 
-	routes := router.engine.Group("/offers").Use(middlewares.Authenticate(router.externalRouter.GetRoute("authenticationService")))
+	routes := router.engine.Group("/offers").Use(middlewares.AuthenticateToken(router.externalRouter.GetRoute("authenticationService")))
 	routes.POST("/", offerController.CreateOffer(router.database))
-	routes.GET("//:offerId", offerController.GetOfferById(router.database))
+	routes.GET("/", offerController.GetSellersOffers(router.database))
+	routes.GET("/:offerId", offerController.GetSellersOfferById(router.database))
+
+	internalRoutes := router.engine.Group("/internal/offers").Use(middlewares.AuthenticateSecret())
+	internalRoutes.GET("/:offerId", offerController.GetOfferById(router.database))
 }
