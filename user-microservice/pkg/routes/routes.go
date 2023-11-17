@@ -15,6 +15,7 @@ func RegisterRoutes(databaseConnection *gorm.DB) {
 	api := router.Group("/user")
 	api.GET("/validation", controller.Validate(databaseConnection))
 	api.POST("/token", controller.RetrieveToken(databaseConnection))
+	api.POST("/register", controller.Register(databaseConnection))
 
 	address := fmt.Sprintf("%s:%s",
 		os.Getenv("GIN_HOST"),
