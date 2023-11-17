@@ -1,4 +1,4 @@
-package get_orders
+package get_order_by_id
 
 import (
 	"fmt"
@@ -10,8 +10,7 @@ import (
 
 type Parameters struct {
 	SellerId int
-	Page     int
-	Limit    int
+	OrderId  int
 }
 
 func InputParameters(c *gin.Context) (*Parameters, *http_error.HttpError) {
@@ -25,19 +24,18 @@ func InputParameters(c *gin.Context) (*Parameters, *http_error.HttpError) {
 		return nil, &http_error.HttpError{Status: http.StatusBadRequest, Message: map[string]string{"error": fmt.Sprintf("invalid seller id")}}
 	}
 
-	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	orderId, err := strconv.Atoi(c.Param("orderId"))
+
 	if err != nil {
-		return nil, &http_error.HttpError{Status: http.StatusBadRequest, Message: map[string]string{"error": fmt.Sprintf("invalid page: %s", err.Error())}}
+		return nil, &http_error.HttpError{Status: http.StatusBadRequest, Message: map[string]string{"error": "invalid seller id"}}
 	}
 
-	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
-	if err != nil {
-		return nil, &http_error.HttpError{Status: http.StatusBadRequest, Message: map[string]string{"error": fmt.Sprintf("invalid limit: %s", err.Error())}}
+	if orderId == 0 {
+		return nil, &http_error.HttpError{Status: http.StatusBadRequest, Message: map[string]string{"error": fmt.Sprintf("invalid order id")}}
 	}
 
 	return &Parameters{
 		SellerId: sellerId,
-		Page:     page,
-		Limit:    limit,
+		OrderId:  orderId,
 	}, nil
 }

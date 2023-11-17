@@ -7,6 +7,7 @@ import (
 	"order-microservice/pkg/repositories"
 	"order-microservice/pkg/routes/external_router"
 	"order-microservice/pkg/services/order-service/create-order"
+	"os"
 )
 
 func CreateOrder(databaseConnection *gorm.DB) gin.HandlerFunc {
@@ -21,7 +22,7 @@ func CreateOrder(databaseConnection *gorm.DB) gin.HandlerFunc {
 
 		orderRepository := repositories.NewOrderRepository(databaseConnection)
 
-		err = create_order.Create(orderRepository, externalRouter, request, context.GetHeader("token"))
+		err = create_order.Create(orderRepository, externalRouter, request, os.Getenv("API_KEY"))
 		if err != nil {
 			context.AbortWithStatusJSON(err.Status, err.Message)
 			return

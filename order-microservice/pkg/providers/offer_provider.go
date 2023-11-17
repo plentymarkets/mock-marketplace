@@ -10,12 +10,12 @@ import (
 type Offer struct {
 	ID       uint    `json:"id"`
 	SellerID uint    `json:"sellerId"`
-	Gtin     int     `json:"gtin"`
+	GTIN     int     `json:"gtin"`
 	Price    float64 `json:"price"`
 	Quantity int     `json:"quantity"`
 }
 
-func FetchOffer(route external_router.ExternalRoute, token string) (*Offer, error) {
+func FetchOffer(route external_router.ExternalRoute, apiKey string) (*Offer, error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest(route.Method, route.Url, nil)
@@ -23,7 +23,7 @@ func FetchOffer(route external_router.ExternalRoute, token string) (*Offer, erro
 		return nil, err
 	}
 
-	req.Header.Add("token", token)
+	req.Header.Add("apiKey", apiKey)
 
 	resp, err := client.Do(req)
 	if err != nil {

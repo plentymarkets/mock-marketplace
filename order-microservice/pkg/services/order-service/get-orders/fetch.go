@@ -6,6 +6,7 @@ import (
 	"order-microservice/pkg/models"
 	"order-microservice/pkg/repositories"
 	http_error "order-microservice/pkg/utils/http-error"
+	"strconv"
 )
 
 type Result struct {
@@ -15,7 +16,7 @@ type Result struct {
 func FetchOrders(repository repositories.OrderRepository, parameters *Parameters) (*Result, *http_error.HttpError) {
 	offset := calculateOffset(parameters.Page, parameters.Limit)
 
-	orders, err := repository.FindByField("seller_id", parameters.SellerId, &offset, &parameters.Limit)
+	orders, err := repository.FindByField("seller_id", strconv.Itoa(parameters.SellerId), &offset, &parameters.Limit)
 
 	if err != nil {
 		return nil, &http_error.HttpError{Status: http.StatusBadRequest, Message: map[string]string{"error": fmt.Sprintf("could not retrieve orders: %s", err.Error())}}
