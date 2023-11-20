@@ -14,11 +14,6 @@ func main() {
 
 	db := database.CreateConnection(dsn)
 
-	err1 := db.AutoMigrate(&models.User{})
-	if err1 != nil {
-		log.Fatal(err1.Error())
-	}
-
 	err2 := db.AutoMigrate(&models.Product{})
 	if err2 != nil {
 		log.Fatal(err2.Error())

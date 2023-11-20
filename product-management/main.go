@@ -18,7 +18,6 @@ func main() {
 	dsn := database.GetMariaDBDSN()
 	con := database.CreateConnection(dsn)
 
-	router.Auth(con, engine)
 	router.Product(con, engine)
 	router.Variant(con, engine)
 

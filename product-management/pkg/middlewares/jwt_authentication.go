@@ -7,6 +7,10 @@ import (
 	"product-management/pkg/client"
 )
 
+type authenticateToken struct {
+	SellerId string `json:"sellerId"`
+}
+
 func Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		headerToken := c.GetHeader("Token")
@@ -18,7 +22,7 @@ func Authenticate() gin.HandlerFunc {
 		}
 
 		// Find User by token
-		response, err := client.ValidateToken(headerToken)
+		response, err := client.AuthenticationRequest(headerToken)
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -27,12 +31,7 @@ func Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		if response.StatusCode != http.StatusOK {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot Authenticate"})
-			c.Abort()
-			return
-		}
-
+		c.Set("sellerId", response.SellerId)
 		c.Next()
 	}
 }

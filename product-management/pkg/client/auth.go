@@ -1,81 +1,49 @@
 package client
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
+	"io"
 	"net/http"
 	"os"
 )
 
-type AuthUserRequestBody struct {
-	Username string `json:"email"`
-	Password string `json:"password"`
-	ApiToken string `json:"authenticationApiKey"`
+type AuthenticationResponse struct {
+	SellerId string `json:"sellerId"`
 }
 
-func NewAuthUserRequest(username string, password string, apiToken string) ([]byte, error) {
-	request := AuthUserRequestBody{
-		Username: username,
-		Password: password,
-		ApiToken: apiToken,
-	}
+func AuthenticationRequest(token string) (*AuthenticationResponse, error) {
+	client := &http.Client{}
 
-	return json.Marshal(request)
-}
-
-type AuthTokenRequestBody struct {
-	ApiToken string `json:"token"`
-}
-
-func NewAuthTokenRequest(apiToken string) ([]byte, error) {
-	request := AuthTokenRequestBody{
-		ApiToken: apiToken,
-	}
-
-	return json.Marshal(request)
-}
-
-func Authenticate(username string, password string) (*http.Response, error) {
-
-	body, err := NewAuthUserRequest(username, password, os.Getenv("AUTHENTICATION_API_KEY"))
-	if err != nil {
-		log.Printf(err.Error())
-		return nil, err
-	}
-
-	authURL := fmt.Sprintf("%s:%s",
-		os.Getenv("AUTHENTICATOR_MICROSERVICE_URL"),
-		"/user/token",
-	)
-
-	httpClient := &http.Client{}
-	return httpClient.Post(
-		authURL,
-		"application/json",
-		bytes.NewBuffer(body),
-	)
-}
-
-func ValidateToken(token string) (*http.Response, error) {
-
-	body, err := NewAuthTokenRequest(token)
-
-	if err != nil {
-		log.Printf(err.Error())
-		return nil, err
-	}
-
-	authURL := fmt.Sprintf("%s:%s",
+	authURL := fmt.Sprintf("%s%s",
 		os.Getenv("AUTHENTICATOR_MICROSERVICE_URL"),
 		"/user/validation",
 	)
 
-	httpClient := &http.Client{}
-	return httpClient.Post(
-		authURL,
-		"application/json",
-		bytes.NewBuffer(body),
-	)
+	req, err := http.NewRequest("GET", authURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("token", token)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var authentication AuthenticationResponse
+	err = json.Unmarshal(body, &authentication)
+	if err != nil {
+		return nil, err
+	}
+
+	return &authentication, nil
 }

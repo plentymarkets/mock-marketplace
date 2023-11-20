@@ -44,7 +44,7 @@ func generateOrderItem(order models.Order) models.OrderItem {
 	orderItem := models.OrderItem{
 		OrderID:  order.ID,
 		OfferID:  1,
-		GTIN:     "1234567890123",
+		GTIN:     1234567890123,
 		Price:    9.99,
 		Quantity: 1,
 		SKU:      "1234567890123",
