@@ -71,14 +71,10 @@ func (controller *AuthenticateController) Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		message := ""
-
 		if user.ID == 0 {
 			user, err = controller.userRepository.Create(user)
-			message = "The user has been registered successfully"
 		} else {
 			user, err = controller.userRepository.Update(user)
-			message = "The user has been updated successfully"
 		}
 
 		if err != nil {
@@ -88,7 +84,7 @@ func (controller *AuthenticateController) Authenticate() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"Message": message,
+			"Token": user.Token,
 		})
 		c.Done()
 	}
