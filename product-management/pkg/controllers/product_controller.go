@@ -126,7 +126,9 @@ func (controller *ProductController) Update() gin.HandlerFunc { // todo - invest
 func (controller *ProductController) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		gtin := c.Param("gtin")
-		product, err := controller.productRepository.FetchByProduct(models.Product{})
+		token := c.Request.Header.Get("token")
+
+		product, err := controller.productRepository.GetProductByTokenAndGTIN(token, gtin)
 
 		if product.ID == 0 {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Product not found!"})
@@ -149,7 +151,7 @@ func (controller *ProductController) Delete() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Product with id %s has been deleted successfully", gtin)})
+		c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Product with GTIN: %s has been deleted successfully", gtin)})
 		c.Done()
 	}
 }

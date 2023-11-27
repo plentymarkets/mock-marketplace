@@ -76,3 +76,15 @@ func (repository *ProductRepository) Update(product models.Product) (models.Prod
 	tx := repository.database.Model(&product).Updates(product)
 	return product, tx.Error
 }
+
+func (repository *ProductRepository) GetProductByTokenAndGTIN(token string, gtin string) (models.Product, error) {
+	var products models.Product
+
+	err := repository.database.Joins("JOIN users u ON products.user_id = u.id").
+		Joins("JOIN variants v ON v.product_id = products.id").
+		Where("v.gtin = ? AND u.token = ?", gtin, token).
+		Preload("Variants").
+		First(&products).Error
+
+	return products, err
+}

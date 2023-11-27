@@ -10,4 +10,5 @@ type ProductRepositoryContract interface {
 	FetchAll(page int, productsPerPage int) ([]models.Product, int, error)
 	Create(product models.Product, token string) (models.Product, error)
 	Update(product models.Product) (models.Product, error)
+	GetProductByTokenAndGTIN(token string, gtin string) (models.Product, error)
 }
