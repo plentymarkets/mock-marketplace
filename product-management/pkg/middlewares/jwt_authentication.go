@@ -28,11 +28,13 @@ func Authenticate() gin.HandlerFunc {
 		}
 
 		if response.StatusCode != http.StatusOK {
+			log.Printf("Error code: %s", response.Status)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot Authenticate"})
 			c.Abort()
 			return
 		}
 
+		c.Request.Header.Add("seller-id", "1")
 		c.Next()
 	}
 }
