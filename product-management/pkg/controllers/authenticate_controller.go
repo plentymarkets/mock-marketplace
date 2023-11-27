@@ -84,7 +84,7 @@ func (controller *AuthenticateController) Authenticate() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"Token": user.Token,
+			"token": user.Token,
 		})
 		c.Done()
 	}

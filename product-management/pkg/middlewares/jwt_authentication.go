@@ -9,7 +9,7 @@ import (
 
 func Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		headerToken := c.GetHeader("Token")
+		headerToken := c.GetHeader("token")
 
 		if headerToken == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing header token"})

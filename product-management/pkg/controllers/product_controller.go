@@ -58,8 +58,7 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 
 func (controller *ProductController) GetByGTIN() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		gtin := c.Param("gtin")
-		product, err := controller.productRepository.FetchByProduct(models.Product{GTIN: gtin})
+		product, err := controller.productRepository.FetchByProduct(models.Product{})
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -88,7 +87,7 @@ func (controller *ProductController) Create() gin.HandlerFunc {
 			return
 		}
 
-		product, err = controller.productRepository.Create(product)
+		product, err = controller.productRepository.Create(product, c.Request.Header.Get("token"))
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -103,8 +102,7 @@ func (controller *ProductController) Create() gin.HandlerFunc {
 
 func (controller *ProductController) Update() gin.HandlerFunc { // todo - investigate changes on the variant when changing the product.
 	return func(c *gin.Context) {
-		gtin := c.Param("gtin")
-		product, err := controller.productRepository.FetchByProduct(models.Product{GTIN: gtin})
+		product, err := controller.productRepository.FetchByProduct(models.Product{})
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -128,7 +126,7 @@ func (controller *ProductController) Update() gin.HandlerFunc { // todo - invest
 func (controller *ProductController) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		gtin := c.Param("gtin")
-		product, err := controller.productRepository.FetchByProduct(models.Product{GTIN: gtin})
+		product, err := controller.productRepository.FetchByProduct(models.Product{})
 
 		if product.ID == 0 {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Product not found!"})

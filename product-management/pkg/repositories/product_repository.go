@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"math"
 	"product-management/pkg/models"
@@ -57,8 +58,16 @@ func (repository *ProductRepository) FetchAll(page int, productsPerPage int) ([]
 	return products, pageCount, nil
 }
 
-func (repository *ProductRepository) Create(product models.Product) (models.Product, error) {
+func (repository *ProductRepository) Create(product models.Product, userToken string) (models.Product, error) {
+
+	var user models.User
+	if err := repository.database.Where("token = ?", userToken).First(&user).Error; err != nil {
+		return product, fmt.Errorf("failed to find user: %v", err)
+	}
+
 	product.ID = 0 // Remove the possibility of giving the ID in the request
+	product.UserID = user.ID
+
 	tx := repository.database.Create(&product)
 	return product, tx.Error
 }
