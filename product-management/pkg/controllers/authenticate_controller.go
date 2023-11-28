@@ -47,6 +47,11 @@ func (controller *AuthenticateController) Authenticate() gin.HandlerFunc {
 			return
 		}
 
+		if response.StatusCode != http.StatusOK {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Cannot Authenticate"})
+			return
+		}
+
 		body, err := io.ReadAll(response.Body)
 
 		if err != nil {
