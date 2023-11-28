@@ -34,6 +34,13 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 			return
 		}
 
+		// TODO - Implement this
+		//username := c.DefaultQuery("user", "")
+		//if username == "" {
+		//	uuid := mdHashing(username)
+		//	products, pageCount, err := controller.productRepository.GetProductsByToken(uuid)
+		//}
+
 		products, pageCount, err := controller.productRepository.FetchAll(page, ProductsPerPage)
 
 		if err != nil {
@@ -58,7 +65,8 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 
 func (controller *ProductController) GetByGTIN() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		product, err := controller.productRepository.FetchByProduct(models.Product{})
+		gtin := c.Param("gtin")
+		product, err := controller.productRepository.FetchProductByGTIN(gtin)
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -100,9 +108,20 @@ func (controller *ProductController) Create() gin.HandlerFunc {
 	}
 }
 
-func (controller *ProductController) Update() gin.HandlerFunc { // todo - investigate changes on the variant when changing the product.
+func (controller *ProductController) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		product, err := controller.productRepository.FetchByProduct(models.Product{})
+		gtin := c.Param("gtin")
+
+		var updatedProduct = models.Product{}
+		err := c.BindJSON(&updatedProduct)
+
+		if err != nil {
+			log.Println(err.Error())
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+			return
+		}
+
+		existingProduct, err := controller.productRepository.FetchProductByGTIN(gtin)
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -110,7 +129,7 @@ func (controller *ProductController) Update() gin.HandlerFunc { // todo - invest
 			return
 		}
 
-		product, err = controller.productRepository.Update(product)
+		_, err = controller.productRepository.Update(existingProduct, updatedProduct)
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -143,7 +162,7 @@ func (controller *ProductController) Delete() gin.HandlerFunc {
 
 		product.Deleted = true
 
-		product, err = controller.productRepository.Update(product)
+		product, err = controller.productRepository.Update(product, product)
 
 		if err != nil {
 			log.Printf(err.Error())

@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"errors"
-	"fmt"
 	"gorm.io/gorm"
 	"math"
 	"product-management/pkg/models"
@@ -60,31 +59,48 @@ func (repository *ProductRepository) FetchAll(page int, productsPerPage int) ([]
 
 func (repository *ProductRepository) Create(product models.Product, userToken string) (models.Product, error) {
 
+	// TODO - Move this to User.
 	var user models.User
-	if err := repository.database.Where("token = ?", userToken).First(&user).Error; err != nil {
-		return product, fmt.Errorf("failed to find user: %v", err)
+	err := repository.database.Where("token = ?", userToken).First(&user).Error
+
+	if user.ID == 0 || err != nil {
+		return product, err
 	}
 
 	product.ID = 0 // Remove the possibility of giving the ID in the request
 	product.UserID = user.ID
 
-	tx := repository.database.Create(&product)
-	return product, tx.Error
+	err = repository.database.Create(&product).Error
+	return product, err
 }
 
-func (repository *ProductRepository) Update(product models.Product) (models.Product, error) {
-	tx := repository.database.Model(&product).Updates(product)
-	return product, tx.Error
+func (repository *ProductRepository) Update(existingProduct models.Product, updatedProduct models.Product) (models.Product, error) {
+	tx := repository.database.Model(&existingProduct).Updates(updatedProduct)
+	return existingProduct, tx.Error
 }
 
 func (repository *ProductRepository) GetProductByTokenAndGTIN(token string, gtin string) (models.Product, error) {
 	var products models.Product
 
-	err := repository.database.Joins("JOIN users u ON products.user_id = u.id").
+	err := repository.database.
+		Joins("JOIN users u ON products.user_id = u.id").
 		Joins("JOIN variants v ON v.product_id = products.id").
 		Where("v.gtin = ? AND u.token = ?", gtin, token).
 		Preload("Variants").
-		First(&products).Error
+		FirstOrInit(&products).Error
 
 	return products, err
+}
+
+func (repository *ProductRepository) FetchProductByGTIN(gtin string) (models.Product, error) {
+	var product models.Product
+
+	err := repository.database.
+		Joins("JOIN users u ON products.user_id = u.id").
+		Joins("JOIN variants v ON v.product_id = products.id").
+		Where("v.gtin = ?", gtin).
+		Preload("Variants", "gtin = ?", gtin). // Filter variants based on GTIN
+		FirstOrInit(&product)
+
+	return product, err.Error
 }
