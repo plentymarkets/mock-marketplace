@@ -9,5 +9,5 @@ type VariantRepositoryContract interface {
 	FetchById(id string) (models.Variant, error)
 	FetchByProductId() ([]models.Variant, error)
 	Create(variant models.Variant) (models.Variant, error)
-	Update(variant models.Variant) (models.Variant, error)
+	Update(existingVariant models.Variant, updatedVariant models.Variant) (models.Variant, error)
 }

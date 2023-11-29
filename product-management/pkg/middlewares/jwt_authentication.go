@@ -22,7 +22,7 @@ func Authenticate() gin.HandlerFunc {
 
 		if err != nil {
 			log.Printf(err.Error())
-			c.JSON(http.StatusBadRequest, gin.H{"error": "There is a problem with the authentication process "})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "There is a problem with the authentication process. Please try again later"})
 			c.Abort()
 			return
 		}

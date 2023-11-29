@@ -73,9 +73,7 @@ func (controller *VariantController) GetByID() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"data": variant,
-		})
+		c.JSON(http.StatusOK, variant)
 		c.Done()
 	}
 }
@@ -100,18 +98,15 @@ func (controller *VariantController) Create() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Success",
-			"data":    variant,
-		})
+		c.JSON(http.StatusOK, variant)
 		c.Done()
 	}
 }
 
 func (controller *VariantController) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var variant = models.Variant{}
-		err := c.BindJSON(&variant)
+		var updatedVariant = models.Variant{}
+		err := c.BindJSON(&updatedVariant)
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -119,7 +114,13 @@ func (controller *VariantController) Update() gin.HandlerFunc {
 			return
 		}
 
-		variant, err = controller.variantRepository.Update(variant)
+		id := c.Param("id")
+		existingVariant, err := controller.variantRepository.FetchById(id)
+
+		if existingVariant.ID == 0 {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Invalid request"})
+			return
+		}
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -127,10 +128,15 @@ func (controller *VariantController) Update() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Variant updated successfully",
-			"data":    variant,
-		})
+		_, err = controller.variantRepository.Update(existingVariant, updatedVariant)
+
+		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Variant updated successfully"})
 		c.Done()
 	}
 }
@@ -153,7 +159,7 @@ func (controller *VariantController) Delete() gin.HandlerFunc {
 
 		variant.Deleted = true
 
-		variant, err = controller.variantRepository.Update(variant)
+		variant, err = controller.variantRepository.Update(variant, variant)
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -161,10 +167,7 @@ func (controller *VariantController) Delete() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"pageCount": "Variant with id " + id + " Has been deleted successfully",
-			"data":      variant,
-		})
+		c.JSON(http.StatusOK, gin.H{"message": "Variant with id " + id + " Has been deleted successfully"})
 		c.Done()
 	}
 }

@@ -110,7 +110,6 @@ func (controller *ProductController) Create() gin.HandlerFunc {
 
 func (controller *ProductController) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		gtin := c.Param("gtin")
 
 		var updatedProduct = models.Product{}
 		err := c.BindJSON(&updatedProduct)
@@ -121,7 +120,13 @@ func (controller *ProductController) Update() gin.HandlerFunc {
 			return
 		}
 
+		gtin := c.Param("gtin")
 		existingProduct, err := controller.productRepository.FetchProductByGTIN(gtin)
+
+		if existingProduct.ID == 0 {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Product not found!"})
+			return
+		}
 
 		if err != nil {
 			log.Printf(err.Error())
