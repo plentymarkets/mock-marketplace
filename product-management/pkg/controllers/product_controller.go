@@ -123,6 +123,12 @@ func (controller *ProductController) Update() gin.HandlerFunc {
 		gtin := c.Param("gtin")
 		existingProduct, err := controller.productRepository.FetchProductByGTIN(gtin)
 
+		if err != nil {
+			log.Printf(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+			return
+		}
+
 		if existingProduct.ID == 0 {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Product not found!"})
 			return
@@ -154,17 +160,23 @@ func (controller *ProductController) Delete() gin.HandlerFunc {
 
 		product, err := controller.productRepository.GetProductByTokenAndGTIN(token, gtin)
 
-		if product.ID == 0 {
-			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Product not found!"})
-			return
-		}
-
 		if err != nil {
 			log.Printf(err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
 			return
 		}
 
+		if product.ID == 0 {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Product not found!"})
+			return
+		}
+
+		if product.Deleted == true {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Product is already Deleted"})
+			return
+		}
+
+		// Set the  product as deleted
 		product.Deleted = true
 
 		product, err = controller.productRepository.Update(product, product)

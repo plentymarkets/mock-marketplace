@@ -117,14 +117,14 @@ func (controller *VariantController) Update() gin.HandlerFunc {
 		id := c.Param("id")
 		existingVariant, err := controller.variantRepository.FetchById(id)
 
-		if existingVariant.ID == 0 {
-			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Invalid request"})
-			return
-		}
-
 		if err != nil {
 			log.Printf(err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
+			return
+		}
+
+		if existingVariant.ID == 0 {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Invalid request"})
 			return
 		}
 
@@ -146,17 +146,23 @@ func (controller *VariantController) Delete() gin.HandlerFunc {
 		id := c.Param("id")
 		variant, err := controller.variantRepository.FetchById(id)
 
-		if variant.ID == 0 {
-			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Invalid request"})
-			return
-		}
-
 		if err != nil {
 			log.Printf(err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error"})
 			return
 		}
 
+		if variant.ID == 0 {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Invalid request"})
+			return
+		}
+
+		if variant.Deleted == true {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Variant is already Deleted"})
+			return
+		}
+
+		// Set variant as deleted
 		variant.Deleted = true
 
 		variant, err = controller.variantRepository.Update(variant, variant)
