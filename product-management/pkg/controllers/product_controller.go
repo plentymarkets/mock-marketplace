@@ -34,6 +34,13 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 			return
 		}
 
+		// TODO - Implement this
+		//username := c.DefaultQuery("user", "")
+		//if username == "" {
+		//	uuid := mdHashing(username)
+		//	products, pageCount, err := controller.productRepository.GetProductsByToken(uuid)
+		//}
+
 		products, pageCount, err := controller.productRepository.FetchAll(page, ProductsPerPage)
 
 		if err != nil {
@@ -59,7 +66,7 @@ func (controller *ProductController) GetAll() gin.HandlerFunc {
 func (controller *ProductController) GetByGTIN() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		gtin := c.Param("gtin")
-		product, err := controller.productRepository.FetchByProduct(models.Product{GTIN: gtin})
+		product, err := controller.productRepository.FetchProductByGTIN(gtin)
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -88,7 +95,7 @@ func (controller *ProductController) Create() gin.HandlerFunc {
 			return
 		}
 
-		product, err = controller.productRepository.Create(product)
+		product, err = controller.productRepository.Create(product, c.Request.Header.Get("token"))
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -101,10 +108,25 @@ func (controller *ProductController) Create() gin.HandlerFunc {
 	}
 }
 
-func (controller *ProductController) Update() gin.HandlerFunc { // todo - investigate changes on the variant when changing the product.
+func (controller *ProductController) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		var updatedProduct = models.Product{}
+		err := c.BindJSON(&updatedProduct)
+
+		if err != nil {
+			log.Println(err.Error())
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+			return
+		}
+
 		gtin := c.Param("gtin")
-		product, err := controller.productRepository.FetchByProduct(models.Product{GTIN: gtin})
+		existingProduct, err := controller.productRepository.FetchProductByGTIN(gtin)
+
+		if existingProduct.ID == 0 {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Product not found!"})
+			return
+		}
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -112,7 +134,7 @@ func (controller *ProductController) Update() gin.HandlerFunc { // todo - invest
 			return
 		}
 
-		product, err = controller.productRepository.Update(product)
+		_, err = controller.productRepository.Update(existingProduct, updatedProduct)
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -128,7 +150,9 @@ func (controller *ProductController) Update() gin.HandlerFunc { // todo - invest
 func (controller *ProductController) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		gtin := c.Param("gtin")
-		product, err := controller.productRepository.FetchByProduct(models.Product{GTIN: gtin})
+		token := c.Request.Header.Get("token")
+
+		product, err := controller.productRepository.GetProductByTokenAndGTIN(token, gtin)
 
 		if product.ID == 0 {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Product not found!"})
@@ -143,7 +167,7 @@ func (controller *ProductController) Delete() gin.HandlerFunc {
 
 		product.Deleted = true
 
-		product, err = controller.productRepository.Update(product)
+		product, err = controller.productRepository.Update(product, product)
 
 		if err != nil {
 			log.Printf(err.Error())
@@ -151,7 +175,7 @@ func (controller *ProductController) Delete() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Product with id %s has been deleted successfully", gtin)})
+		c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Product with GTIN: %s has been deleted successfully", gtin)})
 		c.Done()
 	}
 }

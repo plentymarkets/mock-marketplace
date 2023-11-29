@@ -25,18 +25,6 @@ func NewAuthUserRequest(username string, password string, apiToken string) ([]by
 	return json.Marshal(request)
 }
 
-type AuthTokenRequestBody struct {
-	ApiToken string `json:"token"`
-}
-
-func NewAuthTokenRequest(apiToken string) ([]byte, error) {
-	request := AuthTokenRequestBody{
-		ApiToken: apiToken,
-	}
-
-	return json.Marshal(request)
-}
-
 func Authenticate(username string, password string) (*http.Response, error) {
 
 	body, err := NewAuthUserRequest(username, password, os.Getenv("AUTHENTICATION_API_KEY"))
@@ -60,22 +48,18 @@ func Authenticate(username string, password string) (*http.Response, error) {
 
 func ValidateToken(token string) (*http.Response, error) {
 
-	body, err := NewAuthTokenRequest(token)
-
-	if err != nil {
-		log.Printf(err.Error())
-		return nil, err
-	}
-
 	authURL := fmt.Sprintf("%s:%s",
 		os.Getenv("AUTHENTICATOR_MICROSERVICE_URL"),
 		"/user/validation",
 	)
 
-	httpClient := &http.Client{}
-	return httpClient.Post(
-		authURL,
-		"application/json",
-		bytes.NewBuffer(body),
-	)
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", authURL, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("token", token)
+	return client.Do(req)
 }

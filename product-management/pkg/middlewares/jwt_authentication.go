@@ -9,7 +9,7 @@ import (
 
 func Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		headerToken := c.GetHeader("Token")
+		headerToken := c.GetHeader("token")
 
 		if headerToken == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing header token"})
@@ -22,17 +22,19 @@ func Authenticate() gin.HandlerFunc {
 
 		if err != nil {
 			log.Printf(err.Error())
-			c.JSON(http.StatusBadRequest, gin.H{"error": "There is a problem with the authentication process "})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "There is a problem with the authentication process. Please try again later"})
 			c.Abort()
 			return
 		}
 
 		if response.StatusCode != http.StatusOK {
+			log.Printf("Error code: %s", response.Status)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot Authenticate"})
 			c.Abort()
 			return
 		}
 
+		c.Request.Header.Add("seller-id", "1")
 		c.Next()
 	}
 }

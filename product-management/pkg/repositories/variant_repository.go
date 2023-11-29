@@ -61,7 +61,7 @@ func (repository *VariantRepository) Create(variant models.Variant) (models.Vari
 	return variant, tx.Error
 }
 
-func (repository *VariantRepository) Update(variant models.Variant) (models.Variant, error) {
-	tx := repository.database.Model(&variant).Updates(variant)
-	return variant, tx.Error
+func (repository *VariantRepository) Update(existingVariant models.Variant, updatedVariant models.Variant) (models.Variant, error) {
+	tx := repository.database.Model(&existingVariant).Updates(updatedVariant)
+	return existingVariant, tx.Error
 }
