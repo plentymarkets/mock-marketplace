@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"order-microservice/pkg/handlers/order-handlers"
+	"order-microservice/pkg/handlers/order_handlers"
 	"order-microservice/pkg/middlewares"
 	"os"
 )

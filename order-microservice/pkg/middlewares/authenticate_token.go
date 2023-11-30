@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"order-microservice/pkg/routes/external_router"
+	"order-microservice/pkg/utils/logger"
 )
 
 type authenticateToken struct {
@@ -20,6 +21,7 @@ func Authenticate() gin.HandlerFunc {
 		token := c.GetHeader("Token")
 
 		if token == "" {
+			logger.Log("missing token", nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
 				"error": "missing token",
 			})
@@ -29,6 +31,7 @@ func Authenticate() gin.HandlerFunc {
 		authentication, err := authenticationRequest(authenticationServiceRoute, token)
 
 		if err != nil {
+			logger.Log("could not authenticate token", nil)
 			c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
 				"error": err.Error(),
 			})

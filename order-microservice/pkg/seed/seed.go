@@ -23,7 +23,6 @@ func Seed(databaseConnection *gorm.DB) error {
 func generateOrder() models.Order {
 	order := models.Order{
 		CustomerID:      1,
-		SellerID:        1,
 		OrderNumber:     "123456789",
 		OrderDate:       time.Now(),
 		Status:          "Created",
@@ -44,7 +43,8 @@ func generateOrderItem(order models.Order) models.OrderItem {
 	orderItem := models.OrderItem{
 		OrderID:  order.ID,
 		OfferID:  1,
-		GTIN:     "1234567890123",
+		SellerID: 1,
+		GTIN:     1234567890123,
 		Price:    9.99,
 		Quantity: 1,
 		SKU:      "1234567890123",

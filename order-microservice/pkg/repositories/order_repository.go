@@ -86,13 +86,13 @@ func (OrderRepository OrderRepository) FindOneByField(field string, value string
 	var order models.Order
 	OrderRepository.Database.Preload("OrderItems")
 
-	transaction := OrderRepository.Database.Where(field+" = ?", value).First(&order)
+	OrderRepository.Database.Where(field+" = ?", value).First(&order)
 
-	if transaction.Error != nil {
+	if OrderRepository.Database.Error != nil {
 		return nil, OrderRepository.Database.Error
 	}
 
-	if transaction.RowsAffected == 0 {
+	if OrderRepository.Database.RowsAffected == 0 {
 		return nil, nil
 	}
 
@@ -146,6 +146,10 @@ func (OrderRepository OrderRepository) FindByField(field string, value string, o
 		return nil, OrderRepository.Database.Error
 	}
 
+	if OrderRepository.Database.RowsAffected == 0 {
+		return nil, nil
+	}
+
 	return &orders, nil
 }
 
@@ -187,20 +191,20 @@ func (OrderRepository OrderRepository) FindByFields(fields map[string]string, of
 }
 
 func (OrderRepository OrderRepository) Create(order *models.Order) error {
-	transaction := OrderRepository.Database.Create(&order)
+	OrderRepository.Database.Create(&order)
 
-	if transaction.Error != nil {
-		return transaction.Error
+	if OrderRepository.Database.Error != nil {
+		return OrderRepository.Database.Error
 	}
 
 	return nil
 }
 
 func (OrderRepository OrderRepository) Update(order *models.Order) error {
-	transaction := OrderRepository.Database.Save(&order)
+	OrderRepository.Database.Save(&order)
 
-	if transaction.Error != nil {
-		return transaction.Error
+	if OrderRepository.Database.Error != nil {
+		return OrderRepository.Database.Error
 	}
 
 	return nil
