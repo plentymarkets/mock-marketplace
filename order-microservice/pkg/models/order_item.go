@@ -6,6 +6,7 @@ import (
 
 type OrderItem struct {
 	ID       uint    `gorm:"primaryKey"`
+	SellerID uint    `gorm:"type:uint"`
 	OrderID  uint    `gorm:"type:int"`
 	OfferID  uint    `gorm:"type:int"`
 	GTIN     int     `gorm:"type:varchar(20)"`

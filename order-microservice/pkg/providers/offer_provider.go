@@ -1,47 +1,44 @@
 package providers
 
 import (
-	"encoding/json"
-	"io"
 	"net/http"
 	"order-microservice/pkg/routes/external_router"
+	"order-microservice/pkg/utils/http_error"
+	"order-microservice/pkg/utils/logger"
 )
 
 type Offer struct {
 	ID       uint    `json:"id"`
 	SellerID uint    `json:"sellerId"`
-	GTIN     int     `json:"gtin"`
+	Gtin     int     `json:"gtin"`
 	Price    float64 `json:"price"`
 	Quantity int     `json:"quantity"`
 }
 
-func FetchOffer(route external_router.ExternalRoute, apiKey string) (*Offer, error) {
-	client := &http.Client{}
+func NewOfferProvider() *Offer {
+	return &Offer{}
+}
 
-	req, err := http.NewRequest(route.Method, route.Url, nil)
+func (offer Offer) Provide(route *external_router.ExternalRoute, token *string) *http_error.HttpError {
+	err := FetchRequest(offer, *route, *token)
+
 	if err != nil {
-		return nil, err
+		logger.Log("could not fetch offer", err)
+		return &http_error.HttpError{Status: http.StatusInternalServerError, Message: map[string]string{"error": "could not fetch offer"}}
 	}
 
-	req.Header.Add("apiKey", apiKey)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
+	if httpError := offer.ValidateProvided(); httpError != nil {
+		return httpError
 	}
 
-	defer resp.Body.Close()
+	return nil
+}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+func (offer Offer) ValidateProvided() *http_error.HttpError {
+	if offer.ID == 0 {
+		logger.Log("offer id is zero", nil)
+		return &http_error.HttpError{Status: http.StatusInternalServerError, Message: map[string]string{"error": "could not fetch offer"}}
 	}
 
-	var offer Offer
-	err = json.Unmarshal(body, &offer)
-	if err != nil {
-		return nil, err
-	}
-
-	return &offer, nil
+	return nil
 }

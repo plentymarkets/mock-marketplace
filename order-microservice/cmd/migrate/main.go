@@ -3,7 +3,7 @@ package main
 import (
 	"order-microservice/pkg/database"
 	"order-microservice/pkg/migrate"
-	"order-microservice/pkg/utils/env-handler"
+	"order-microservice/pkg/utils/env_handler"
 	"os"
 )
 
