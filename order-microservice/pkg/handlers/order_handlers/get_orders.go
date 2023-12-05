@@ -24,25 +24,34 @@ func GetOrders(database *gorm.DB) gin.HandlerFunc {
 		page, err := StringToInt(parameters.Page)
 		if err != nil {
 			logger.Log("could not convert page to integer", err)
-			context.AbortWithStatusJSON(http.StatusBadRequest, "Seller id must be an integer")
+			context.AbortWithStatusJSON(http.StatusBadRequest, "Seller id must be convertable to integer")
 			return
 		}
 
 		limit, err := StringToInt(parameters.Limit)
 		if err != nil {
 			logger.Log("could not convert limit to integer", err)
-			context.AbortWithStatusJSON(http.StatusBadRequest, "Page must be an integer")
+			context.AbortWithStatusJSON(http.StatusBadRequest, "Page must be convertable to integer")
 			return
 		}
 
 		offset := calculateOffset(page, limit)
 
 		orderRepository := repositories.NewOrderRepository(database)
-		orders, err := orderRepository.FindByField("seller_id", parameters.SellerId, &offset, &limit)
+
+		sellerId, err := StringToInt(parameters.SellerId)
+
+		if err != nil {
+			logger.Log("could not convert seller id to integer", err)
+			context.AbortWithStatusJSON(http.StatusBadRequest, "Seller id must be convertable to integer")
+			return
+		}
+
+		orders, err := orderRepository.FindBySeller(uint(sellerId), &offset, &limit)
 
 		if err != nil {
 			logger.Log("Database transaction was not successful", err)
-			context.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+			context.AbortWithStatusJSON(http.StatusInternalServerError, "Database transaction was not successful")
 			return
 		}
 

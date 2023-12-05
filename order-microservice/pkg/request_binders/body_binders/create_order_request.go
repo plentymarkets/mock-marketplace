@@ -15,7 +15,7 @@ func NewCreateOrderRequest() *CreateOrderRequest {
 	return &CreateOrderRequest{}
 }
 
-func (request CreateOrderRequest) Bind(context *gin.Context) *http_error.HttpError {
+func (request *CreateOrderRequest) Bind(context *gin.Context) *http_error.HttpError {
 	err := context.BindJSON(&request)
 
 	if err != nil {
@@ -30,7 +30,7 @@ func (request CreateOrderRequest) Bind(context *gin.Context) *http_error.HttpErr
 	return nil
 }
 
-func (request CreateOrderRequest) ValidateBodyRequest() *http_error.HttpError {
+func (request *CreateOrderRequest) ValidateBodyRequest() *http_error.HttpError {
 	if len(request.OfferIds) == 0 {
 		logger.Log("no offer ids provided", nil)
 		return &http_error.HttpError{Status: http.StatusBadRequest, Message: map[string]string{"error": "no offer ids provided"}}

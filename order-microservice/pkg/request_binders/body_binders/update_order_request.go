@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"order-microservice/pkg/utils/http_error"
 	"order-microservice/pkg/utils/logger"
+	"order-microservice/pkg/utils/string_conversion"
 )
 
 type UpdateOrderRequest struct {
-	SellerId int    `json:"sellerId"`
+	SellerId int
 	OrderId  int    `json:"orderId"`
 	Status   string `json:"status"`
 }
@@ -17,8 +18,11 @@ func NewUpdateOrderRequest() *UpdateOrderRequest {
 	return &UpdateOrderRequest{}
 }
 
-func (request UpdateOrderRequest) Bind(context *gin.Context) *http_error.HttpError {
+func (request *UpdateOrderRequest) Bind(context *gin.Context) *http_error.HttpError {
+	sellerId := context.GetString("sellerId")
 	err := context.BindJSON(&request)
+
+	request.SellerId, err = string_conversion.StringToInt(sellerId)
 
 	if err != nil {
 		logger.Log("invalid requestData body", err)
@@ -32,7 +36,7 @@ func (request UpdateOrderRequest) Bind(context *gin.Context) *http_error.HttpErr
 	return nil
 }
 
-func (request UpdateOrderRequest) ValidateBodyRequest() *http_error.HttpError {
+func (request *UpdateOrderRequest) ValidateBodyRequest() *http_error.HttpError {
 	if request.SellerId == 0 {
 		logger.Log("invalid seller id", nil)
 		return &http_error.HttpError{Status: http.StatusBadRequest, Message: map[string]string{"error": "invalid seller id"}}

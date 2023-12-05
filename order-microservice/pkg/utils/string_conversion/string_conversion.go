@@ -7,5 +7,11 @@ func IntToString(int int) string {
 }
 
 func StringToInt(string string) (int, error) {
-	return strconv.Atoi(string)
+	integer, err := strconv.Atoi(string)
+	return integer, err
+}
+
+func StringToUint(string string) (uint, error) {
+	integer, err := strconv.Atoi(string)
+	return uint(integer), err
 }

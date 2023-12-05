@@ -18,7 +18,7 @@ func NewGetOrderByIdRequest() *CreateOrderByIdRequest {
 
 func (request *CreateOrderByIdRequest) Bind(c *gin.Context) *http_error.HttpError {
 	sellerId := c.GetString("sellerId")
-	orderId := c.Query("orderId")
+	orderId := c.Param("orderId")
 
 	request.SellerId = sellerId
 	request.OrderId = orderId

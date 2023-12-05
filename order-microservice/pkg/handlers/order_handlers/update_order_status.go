@@ -7,7 +7,6 @@ import (
 	"order-microservice/pkg/repositories"
 	"order-microservice/pkg/request_binders/body_binders"
 	"order-microservice/pkg/utils/logger"
-	"strconv"
 )
 
 func UpdateOrderStatus(database *gorm.DB) gin.HandlerFunc {
@@ -23,12 +22,7 @@ func UpdateOrderStatus(database *gorm.DB) gin.HandlerFunc {
 
 		orderRepository := repositories.NewOrderRepository(database)
 
-		fields := map[string]string{
-			"seller_id": strconv.Itoa(request.SellerId),
-			"id":        strconv.Itoa(request.OrderId),
-		}
-
-		order, err := orderRepository.FindOneByFields(fields)
+		order, err := orderRepository.FindOneBySellerAndByOrderId(uint(request.SellerId), uint(request.OrderId))
 
 		if err != nil {
 			logger.Log("could not retrieve order", err)
@@ -36,7 +30,7 @@ func UpdateOrderStatus(database *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if order.ID == 0 {
+		if order == nil {
 			logger.Log("order not found", nil)
 			context.AbortWithStatusJSON(http.StatusNotFound, "Order not found")
 			return

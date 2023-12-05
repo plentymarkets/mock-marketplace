@@ -15,7 +15,7 @@ func NewCustomerProvider() *Customer {
 	return &Customer{}
 }
 
-func (customer Customer) Provide(route *external_router.ExternalRoute, token *string) *http_error.HttpError {
+func (customer *Customer) Provide(route *external_router.ExternalRoute, token *string) *http_error.HttpError {
 	customer.ID = 1
 	customer.ShippingAddress = "123 Main St, New York, NY 10001"
 	customer.BillingAddress = "123 Main St, New York, NY 10001"
@@ -27,6 +27,6 @@ func (customer Customer) Provide(route *external_router.ExternalRoute, token *st
 	return nil
 }
 
-func (customer Customer) ValidateProvided() *http_error.HttpError {
+func (customer *Customer) ValidateProvided() *http_error.HttpError {
 	return nil
 }
