@@ -77,6 +77,14 @@ func (controller *OfferController) GetSellersOffers(databaseConnection *gorm.DB)
 			return
 		}
 
+		if offers == nil {
+			c.JSON(http.StatusNotFound, map[string]string{
+				"error": "Offers not found",
+			})
+			c.Abort()
+			return
+		}
+
 		c.JSON(http.StatusOK, offers)
 		c.Done()
 	}
@@ -111,6 +119,14 @@ func (controller *OfferController) GetSellersOfferById(databaseConnection *gorm.
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": "Could not retrieve offer",
+			})
+			c.Abort()
+			return
+		}
+
+		if offer == nil {
+			c.JSON(http.StatusNotFound, map[string]string{
+				"error": "Offer not found",
 			})
 			c.Abort()
 			return
