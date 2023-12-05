@@ -78,9 +78,7 @@ func RetrieveToken(databaseConnection *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		timeNow := time.Now()
-		println(timeNow.String())
-		token, timestamp, err := token.Generate()
+		token, timestamp, refreshTimestamp, err := token.Generate()
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{
@@ -91,6 +89,7 @@ func RetrieveToken(databaseConnection *gorm.DB) gin.HandlerFunc {
 
 		user.Token = token
 		user.TokenExpiration = timestamp
+		user.RefreshTokenExpiration = refreshTimestamp
 		userRepository.UpdateUser(user)
 
 		c.JSON(http.StatusOK, map[string]string{

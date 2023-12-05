@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
+	tokenGenerator "user-microservice/pkg/middleware/token"
 	"user-microservice/pkg/repositories"
 )
 
@@ -42,6 +44,29 @@ func Validate(databaseConnection *gorm.DB) gin.HandlerFunc {
 
 		userRepository := repositories.NewRepository(databaseConnection)
 		user, err := userRepository.FindOneByField("token", token)
+
+		if user.TokenExpiration.Before(time.Now()) && user.RefreshTokenExpiration.After(time.Now()) {
+			token, timestamp, refreshTimestamp, err := tokenGenerator.Generate()
+
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
+					"error": err.Error(),
+				})
+				return
+			}
+
+			user.Token = token
+			user.TokenExpiration = timestamp
+			user.RefreshTokenExpiration = refreshTimestamp
+			userRepository.UpdateUser(user)
+
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
+					"error": err.Error(),
+				})
+				return
+			}
+		}
 
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
